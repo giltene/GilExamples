@@ -28,19 +28,26 @@ public class NonConstructableBaseClass<T> {
                                                                              final Class[] additionalSubClassArgTypes,
                                                                              final Object... additionalSubClassArgs) throws NoSuchMethodException {
         final Class[] constructorArgTypes = new Class[additionalSubClassArgTypes.length + 3];
-        constructorArgTypes[0] = Object.class;
+        constructorArgTypes[0] = Object.class; // Placeholder for ConstructorMagic
         constructorArgTypes[1] = Class.class;
         constructorArgTypes[2] = int.class;
         System.arraycopy(additionalSubClassArgTypes, 0, constructorArgTypes, 3, additionalSubClassArgTypes.length);
         final Constructor<C> constructor = subClassToConstruct.getConstructor(constructorArgTypes);
 
+        final Object[] constructorArgs = new Object[additionalSubClassArgs.length + 3];
+        constructorArgs[0] = null; // Placeholder for constructorMagic
+        constructorArgs[1] = memberClass;
+        constructorArgs[2] = (Integer) argA;
+        System.arraycopy(additionalSubClassArgs, 0, constructorArgs, 3, additionalSubClassArgs.length);
+
+        return newInstance(constructor, constructorArgs);
+    }
+
+    public static <C extends NonConstructableBaseClass<T>, T> C  newInstance(Constructor<C> constructor,
+                                                                             final Object... constructorArgs) throws NoSuchMethodException {
         ConstructorMagic constructorMagic = new ConstructorMagic();
         try {
-            final Object[] constructorArgs = new Object[additionalSubClassArgs.length + 3];
             constructorArgs[0] = constructorMagic;
-            constructorArgs[1] = memberClass;
-            constructorArgs[2] = (Integer) argA;
-            System.arraycopy(additionalSubClassArgs, 0, constructorArgs, 3, additionalSubClassArgs.length);
             return constructor.newInstance(constructorArgs);
         } catch (final InstantiationException ex) {
             throw new RuntimeException(ex);

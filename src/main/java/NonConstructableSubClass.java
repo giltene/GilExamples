@@ -1,3 +1,4 @@
+import java.lang.reflect.Constructor;
 
 public class NonConstructableSubClass<T> extends NonConstructableBaseClass<T> {
     private final int fieldB;
@@ -10,10 +11,21 @@ public class NonConstructableSubClass<T> extends NonConstructableBaseClass<T> {
                 NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, memberClass, argA);
     }
 
+
+    static final Class[] constructorArgTypes = {Object.class, Class.class, int.class, int.class, int.class};
     @SuppressWarnings("unchecked")
     public static <T> NonConstructableSubClass<T> newInstance(Class<T> memberClass, int argA, int argB, int argC)
             throws NoSuchMethodException {
-        Class additionalConstructorArgTypes[] = {int.class, int.class};
+        Constructor<NonConstructableSubClass> constructor =
+                NonConstructableSubClass.class.getConstructor(constructorArgTypes);
+        return (NonConstructableSubClass<T>)
+                NonConstructableBaseClass.newInstance(constructor, null /* magic placeholder */, memberClass, argA, argB, argC);
+    }
+
+    static final Class additionalConstructorArgTypes[] = {int.class, int.class};
+    @SuppressWarnings("unchecked")
+    public static <T> NonConstructableSubClass<T> newInstance2(Class<T> memberClass, int argA, int argB, int argC)
+            throws NoSuchMethodException {
         return (NonConstructableSubClass<T>)
                 NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, memberClass, argA,
                         additionalConstructorArgTypes, argB, argC);

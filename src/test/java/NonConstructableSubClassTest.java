@@ -21,9 +21,19 @@ public class NonConstructableSubClassTest {
     }
 
     @Test
-    public void shouldCreateSubClassInstanceWithParams() throws NoSuchMethodException {
+    public void shouldCreateSubClassInstanceWithConstructor() throws NoSuchMethodException {
         final NonConstructableSubClass<Object> instance =
                 NonConstructableSubClass.newInstance(Object.class, 5, 9, 21);
+        assertThat(valueOf(instance.getFieldA()), is(5));
+        assertThat(valueOf(instance.getFieldB()), is(9));
+        assertThat(valueOf(instance.getFieldC()), is(21));
+        assertTrue(instance.getMemberClass() == Object.class);
+    }
+
+    @Test
+    public void shouldCreateSubClassInstanceWithAdditionalParams() throws NoSuchMethodException {
+        final NonConstructableSubClass<Object> instance =
+                NonConstructableSubClass.newInstance2(Object.class, 5, 9, 21);
         assertThat(valueOf(instance.getFieldA()), is(5));
         assertThat(valueOf(instance.getFieldB()), is(9));
         assertThat(valueOf(instance.getFieldC()), is(21));
