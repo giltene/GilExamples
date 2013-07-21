@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class NonConstructableBaseClass<T> {
     private final int fieldA;
+    private final Class<T> memberClass;
 
     private static final Class[] EMPTY_ARG_TYPES = new Class[0];
     private static final Object[] EMPTY_ARGS = new Object[0];
@@ -53,11 +54,17 @@ public class NonConstructableBaseClass<T> {
             throw new IllegalArgumentException("Bad magic construction parameter (type mismatch)");
         checkConstructorMagic((ConstructorMagic) constructorMagic);
         fieldA = argA;
+        this.memberClass = memberClass;
     }
 
     public int getFieldA() {
         return fieldA;
     }
+
+    public Class<T> getMemberClass() {
+        return memberClass;
+    }
+
 
     // ConstructorMagic support:
 

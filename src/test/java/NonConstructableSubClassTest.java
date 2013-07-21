@@ -11,10 +11,12 @@ import static org.junit.Assert.assertTrue;
 public class NonConstructableSubClassTest {
     @Test
     public void shouldCreateSubClassInstanceWithDefaultParams() throws NoSuchMethodException {
-        final NonConstructableSubClass<Object> instance =
-                NonConstructableSubClass.newInstance(Object.class, 5);
+        final NonConstructableSubClass<Long> instance =
+                NonConstructableSubClass.newInstance(Long.class, 5);
         assertThat(valueOf(instance.getFieldA()), is(5));
         assertThat(valueOf(instance.getFieldB()), is(7));
+        assertTrue(instance.getMemberClass() == Long.class);
+
     }
 
     @Test
@@ -23,6 +25,7 @@ public class NonConstructableSubClassTest {
                 NonConstructableSubClass.newInstance(Object.class, 5, 9);
         assertThat(valueOf(instance.getFieldA()), is(5));
         assertThat(valueOf(instance.getFieldB()), is(9));
+        assertTrue(instance.getMemberClass() == Object.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
