@@ -15,6 +15,7 @@ public class NonConstructableSubClassTest {
                 NonConstructableSubClass.newInstance(Long.class, 5);
         assertThat(valueOf(instance.getFieldA()), is(5));
         assertThat(valueOf(instance.getFieldB()), is(7));
+        assertThat(valueOf(instance.getFieldC()), is(17));
         assertTrue(instance.getMemberClass() == Long.class);
 
     }
@@ -22,10 +23,27 @@ public class NonConstructableSubClassTest {
     @Test
     public void shouldCreateSubClassInstanceWithParams() throws NoSuchMethodException {
         final NonConstructableSubClass<Object> instance =
-                NonConstructableSubClass.newInstance(Object.class, 5, 9);
+                NonConstructableSubClass.newInstance(Object.class, 5, 9, 21);
         assertThat(valueOf(instance.getFieldA()), is(5));
         assertThat(valueOf(instance.getFieldB()), is(9));
+        assertThat(valueOf(instance.getFieldC()), is(21));
         assertTrue(instance.getMemberClass() == Object.class);
+    }
+
+    @Test
+    public void shouldCreateBaseClassInstanceEvenWithSubclassNewInstance() throws NoSuchMethodException {
+        final NonConstructableBaseClass<Long> instance =
+                NonConstructableBaseClass.newInstance(NonConstructableBaseClass.class, Long.class, 5);
+        assertThat(valueOf(instance.getFieldA()), is(5));
+        assertTrue(instance.getMemberClass() == Long.class);
+    }
+
+    @Test
+    public void shouldCreateBaseClassInstance() throws NoSuchMethodException {
+        final NonConstructableBaseClass<Long> instance =
+                NonConstructableBaseClass.newInstance(Long.class, 5);
+        assertThat(valueOf(instance.getFieldA()), is(5));
+        assertTrue(instance.getMemberClass() == Long.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -37,7 +55,7 @@ public class NonConstructableSubClassTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithParams() throws NoSuchMethodException {
         final NonConstructableSubClass<Object> instance =
-                new NonConstructableSubClass<Object>(new Object(), Object.class, 5, 9);
+                new NonConstructableSubClass<Object>(new Object(), Object.class, 5, 9, 21);
     }
 
 }

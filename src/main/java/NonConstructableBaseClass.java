@@ -11,32 +11,37 @@ public class NonConstructableBaseClass<T> {
     private static final Class[] EMPTY_ARG_TYPES = new Class[0];
     private static final Object[] EMPTY_ARGS = new Object[0];
 
-    public static <T> NonConstructableBaseClass<T> newInstance(Class<NonConstructableBaseClass<T>> subClassToConstruct,
-                                                               Class<T> memberClass,
+    public static <T> NonConstructableBaseClass<T> newInstance(Class<T> memberClass,
                                                                int argA) throws NoSuchMethodException {
+        return newInstance(NonConstructableBaseClass.class, memberClass, argA, EMPTY_ARG_TYPES, EMPTY_ARGS);
+    }
+
+    public static <C extends NonConstructableBaseClass<T>, T> C newInstance(Class<C> subClassToConstruct,
+                                                                            Class<T> memberClass,
+                                                                            int argA) throws NoSuchMethodException {
         return newInstance(subClassToConstruct, memberClass, argA, EMPTY_ARG_TYPES, EMPTY_ARGS);
     }
 
-    public static <T> NonConstructableBaseClass<T> newInstance(Class<NonConstructableBaseClass<T>> subClassToConstruct,
-                                                          Class<T> memberClass,
-                                                          int argA,
-                                                          final Class[] initArgTypes,
-                                                          final Object... initArgs) throws NoSuchMethodException {
-        final Class[] myInitArgTypes = new Class[initArgTypes.length + 3];
-        myInitArgTypes[0] = Object.class;
-        myInitArgTypes[1] = Class.class;
-        myInitArgTypes[2] = int.class;
-        System.arraycopy(initArgTypes, 0, myInitArgTypes, 3, initArgTypes.length);
-        final Constructor<NonConstructableBaseClass<T>> constructor = subClassToConstruct.getConstructor(myInitArgTypes);
+    public static <C extends NonConstructableBaseClass<T>, T> C  newInstance(Class<C> subClassToConstruct,
+                                                                             Class<T> memberClass,
+                                                                             int argA,
+                                                                             final Class[] additionalSubClassArgTypes,
+                                                                             final Object... additionalSubClassArgs) throws NoSuchMethodException {
+        final Class[] constructorArgTypes = new Class[additionalSubClassArgTypes.length + 3];
+        constructorArgTypes[0] = Object.class;
+        constructorArgTypes[1] = Class.class;
+        constructorArgTypes[2] = int.class;
+        System.arraycopy(additionalSubClassArgTypes, 0, constructorArgTypes, 3, additionalSubClassArgTypes.length);
+        final Constructor<C> constructor = subClassToConstruct.getConstructor(constructorArgTypes);
 
         ConstructorMagic constructorMagic = new ConstructorMagic();
         try {
-            final Object[] myInitArgs = new Object[initArgs.length + 3];
-            myInitArgs[0] = constructorMagic;
-            myInitArgs[1] = memberClass;
-            myInitArgs[2] = (Integer) argA;
-            System.arraycopy(initArgs, 0, myInitArgs, 3, initArgs.length);
-            return constructor.newInstance(myInitArgs);
+            final Object[] constructorArgs = new Object[additionalSubClassArgs.length + 3];
+            constructorArgs[0] = constructorMagic;
+            constructorArgs[1] = memberClass;
+            constructorArgs[2] = (Integer) argA;
+            System.arraycopy(additionalSubClassArgs, 0, constructorArgs, 3, additionalSubClassArgs.length);
+            return constructor.newInstance(constructorArgs);
         } catch (final InstantiationException ex) {
             throw new RuntimeException(ex);
         } catch (final IllegalAccessException ex) {

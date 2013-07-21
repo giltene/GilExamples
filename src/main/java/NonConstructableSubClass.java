@@ -1,42 +1,42 @@
-/**
- * Created with IntelliJ IDEA.
- * User: gil
- * Date: 7/20/13
- * Time: 6:20 PM
- * To change this template use File | Settings | File Templates.
- */
+
 public class NonConstructableSubClass<T> extends NonConstructableBaseClass<T> {
     private final int fieldB;
+    private final int fieldC;
 
+    @SuppressWarnings("unchecked")
     public static <T> NonConstructableSubClass<T> newInstance(Class<T> memberClass, int argA)
             throws NoSuchMethodException {
-        final Class c = NonConstructableSubClass.class;
-        final Class<NonConstructableBaseClass<T>> subClass = (Class<NonConstructableBaseClass<T>>) c;
         return (NonConstructableSubClass<T>)
-                NonConstructableBaseClass.newInstance(subClass, memberClass, argA);
+                NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, memberClass, argA);
     }
 
-    public static <T> NonConstructableSubClass<T> newInstance(Class<T> memberClass, int argA, int argB)
+    @SuppressWarnings("unchecked")
+    public static <T> NonConstructableSubClass<T> newInstance(Class<T> memberClass, int argA, int argB, int argC)
             throws NoSuchMethodException {
-        Class myInitArgTypes[] = {int.class};
-        final Class c = NonConstructableSubClass.class;
-        final Class<NonConstructableBaseClass<T>> subClass = (Class<NonConstructableBaseClass<T>>) c;
+        Class additionalConstructorArgTypes[] = {int.class, int.class};
         return (NonConstructableSubClass<T>)
-                NonConstructableBaseClass.newInstance(subClass, memberClass, argA, myInitArgTypes, argB);
+                NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, memberClass, argA,
+                        additionalConstructorArgTypes, argB, argC);
     }
 
-    public NonConstructableSubClass(Object constructorMagic, Class<T> memberClass, int argA, int argB) {
+    public NonConstructableSubClass(Object constructorMagic, Class<T> memberClass, int argA, int argB, int argC) {
         super(constructorMagic, memberClass, argA);
         fieldB = argB;
+        fieldC = argC;
     }
 
     public NonConstructableSubClass(Object constructorMagic, Class<T> memberClass, int argA) {
         super(constructorMagic, memberClass, argA);
         fieldB = 7;
+        fieldC = 17;
     }
 
     public int getFieldB() {
         return fieldB;
+    }
+
+    public int getFieldC() {
+        return fieldC;
     }
 }
 
