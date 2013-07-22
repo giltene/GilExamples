@@ -1,44 +1,28 @@
 import java.lang.reflect.Constructor;
 
-public class NonConstructableSubClass<T> extends NonConstructableBaseClass<T> {
+public class NonConstructableSubClass extends NonConstructableBaseClass {
     private final int fieldB;
     private final int fieldC;
 
-    @SuppressWarnings("unchecked")
-    public static <T> NonConstructableSubClass<T> newInstance(Class<T> memberClass, int argA)
+    public static NonConstructableSubClass newInstance(int argA)
             throws NoSuchMethodException {
-        return (NonConstructableSubClass<T>)
-                NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, memberClass, argA);
+        return NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, argA);
     }
 
-
-    static final Class[] constructorArgTypes = {Object.class, Class.class, int.class, int.class, int.class};
-    @SuppressWarnings("unchecked")
-    public static <T> NonConstructableSubClass<T> newInstance(Class<T> memberClass, int argA, int argB, int argC)
+    public static NonConstructableSubClass newInstance(int argA, int argB, int argC)
             throws NoSuchMethodException {
-        Constructor<NonConstructableSubClass> constructor =
-                NonConstructableSubClass.class.getConstructor(constructorArgTypes);
-        return (NonConstructableSubClass<T>)
-                NonConstructableBaseClass.newInstance(constructor, null /* magic placeholder */, memberClass, argA, argB, argC);
+        return NonConstructableBaseClass.newInstance(fullConstructor,
+                null /* constructorMagic */, argA, argB, argC);
     }
 
-    static final Class additionalConstructorArgTypes[] = {int.class, int.class};
-    @SuppressWarnings("unchecked")
-    public static <T> NonConstructableSubClass<T> newInstance2(Class<T> memberClass, int argA, int argB, int argC)
-            throws NoSuchMethodException {
-        return (NonConstructableSubClass<T>)
-                NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, memberClass, argA,
-                        additionalConstructorArgTypes, argB, argC);
-    }
-
-    public NonConstructableSubClass(Object constructorMagic, Class<T> memberClass, int argA, int argB, int argC) {
-        super(constructorMagic, memberClass, argA);
+    public NonConstructableSubClass(Object constructorMagic, int argA, int argB, int argC) {
+        super(constructorMagic, argA);
         fieldB = argB;
         fieldC = argC;
     }
 
-    public NonConstructableSubClass(Object constructorMagic, Class<T> memberClass, int argA) {
-        super(constructorMagic, memberClass, argA);
+    public NonConstructableSubClass(Object constructorMagic, int argA) {
+        super(constructorMagic, argA);
         fieldB = 7;
         fieldC = 17;
     }
@@ -49,6 +33,17 @@ public class NonConstructableSubClass<T> extends NonConstructableBaseClass<T> {
 
     public int getFieldC() {
         return fieldC;
+    }
+
+    static final Class[] fullConstructorArgTypes = {Object.class /* magic*/, int.class, int.class, int.class};
+    static final Constructor<NonConstructableSubClass> fullConstructor;
+
+    static {
+        try {
+            fullConstructor = NonConstructableSubClass.class.getConstructor(fullConstructorArgTypes);
+        } catch (NoSuchMethodException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }
 

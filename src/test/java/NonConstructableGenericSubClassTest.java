@@ -1,57 +1,58 @@
 import org.junit.Test;
 
-import java.util.Observable;
-
-import static java.lang.Long.valueOf;
 import static java.lang.Integer.valueOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class NonConstructableSubClassTest {
+public class NonConstructableGenericSubClassTest {
     @Test
     public void shouldCreateSubClassInstanceWithDefaultParams() throws NoSuchMethodException {
-        final NonConstructableSubClass instance =
-                NonConstructableSubClass.newInstance(5);
+        final NonConstructableGenericSubClass<Long> instance =
+                NonConstructableGenericSubClass.newInstance(Long.class, 5);
         assertThat(valueOf(instance.getFieldA()), is(5));
         assertThat(valueOf(instance.getFieldB()), is(7));
         assertThat(valueOf(instance.getFieldC()), is(17));
+        assertTrue(instance.getMemberClass() == Long.class);
 
     }
 
     @Test
     public void shouldCreateSubClassInstanceWithConstructor() throws NoSuchMethodException {
-        final NonConstructableSubClass instance =
-                NonConstructableSubClass.newInstance(5, 9, 21);
+        final NonConstructableGenericSubClass<Object> instance =
+                NonConstructableGenericSubClass.newInstance(Object.class, 5, 9, 21);
         assertThat(valueOf(instance.getFieldA()), is(5));
         assertThat(valueOf(instance.getFieldB()), is(9));
         assertThat(valueOf(instance.getFieldC()), is(21));
+        assertTrue(instance.getMemberClass() == Object.class);
     }
 
     @Test
     public void shouldCreateBaseClassInstanceEvenWithSubclassNewInstance() throws NoSuchMethodException {
-        final NonConstructableBaseClass instance =
-                NonConstructableBaseClass.newInstance(NonConstructableBaseClass.class, 5);
+        final NonConstructableGenericBaseClass<Long> instance =
+                NonConstructableGenericBaseClass.newInstance(NonConstructableGenericBaseClass.class, Long.class, 5);
         assertThat(valueOf(instance.getFieldA()), is(5));
+        assertTrue(instance.getMemberClass() == Long.class);
     }
 
     @Test
     public void shouldCreateBaseClassInstance() throws NoSuchMethodException {
-        final NonConstructableBaseClass instance =
-                NonConstructableBaseClass.newInstance(5);
+        final NonConstructableGenericBaseClass<Long> instance =
+                NonConstructableGenericBaseClass.newInstance(Long.class, 5);
         assertThat(valueOf(instance.getFieldA()), is(5));
+        assertTrue(instance.getMemberClass() == Long.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithDefaultParams() throws NoSuchMethodException {
-        final NonConstructableSubClass instance =
-                new NonConstructableSubClass(new Object(), 5);
+        final NonConstructableGenericSubClass<Object> instance =
+                new NonConstructableGenericSubClass<Object>(new Object(), Object.class, 5);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithParams() throws NoSuchMethodException {
-        final NonConstructableSubClass instance =
-                new NonConstructableSubClass(new Object(), 5, 9, 21);
+        final NonConstructableGenericSubClass<Object> instance =
+                new NonConstructableGenericSubClass<Object>(new Object(), Object.class, 5, 9, 21);
     }
 
 }

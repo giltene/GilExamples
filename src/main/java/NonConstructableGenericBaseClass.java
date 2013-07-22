@@ -4,23 +4,31 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NonConstructableBaseClass {
+public class NonConstructableGenericBaseClass<T> {
     private final int fieldA;
+    private final Class<T> memberClass;
 
-    private static final Class[] BASECLASS_CONSTRUCTOR_ARG_TYPES = { Object.class, int.class };
+    private static final Class[] BASECLASS_CONSTRUCTOR_ARG_TYPES = { Object.class, Class.class, int.class };
 
-    public static NonConstructableBaseClass newInstance(final int argA) throws NoSuchMethodException {
-        return newInstance(NonConstructableBaseClass.class, argA);
-    }
-
-    public static <C extends NonConstructableBaseClass> C newInstance(final Class<C> subClassToConstruct,
+    @SuppressWarnings("unchecked")
+    public static <T> NonConstructableGenericBaseClass<T> newInstance(final Class<T> memberClass,
                                                                       final int argA) throws NoSuchMethodException {
-        final Constructor<C> constructor = subClassToConstruct.getConstructor(BASECLASS_CONSTRUCTOR_ARG_TYPES);
-        return newInstance(constructor, null /* constructorMagic placeholder */, argA);
+        final Constructor<NonConstructableGenericBaseClass> constructor =
+                NonConstructableGenericBaseClass.class.getConstructor(BASECLASS_CONSTRUCTOR_ARG_TYPES);
+        return newInstance(constructor, null /* constructorMagic placeholder*/, memberClass, argA);
     }
 
-    public static <C extends NonConstructableBaseClass> C  newInstance(final Constructor<C> constructor,
-                                                                       final Object... constructorArgs) throws NoSuchMethodException {
+    public static <C extends NonConstructableGenericBaseClass<T>, T> C
+    newInstance(final Class<C> subClassToConstruct,
+                final Class<T> memberClass,
+                final int argA) throws NoSuchMethodException {
+        final Constructor<C> constructor = subClassToConstruct.getConstructor(BASECLASS_CONSTRUCTOR_ARG_TYPES);
+        return newInstance(constructor, null /* constructorMagic placeholder*/, memberClass, argA);
+    }
+
+    public static <C extends NonConstructableGenericBaseClass<T>, T> C
+    newInstance(final Constructor<C> constructor,
+                final Object... constructorArgs) throws NoSuchMethodException {
         if (constructorArgs.length < 2) {
             throw new IllegalArgumentException("Constructor must have 2 or more args");
         }
@@ -41,16 +49,22 @@ public class NonConstructableBaseClass {
         }
     }
 
-    public NonConstructableBaseClass(final Object constructorMagic, final int argA) {
+    public NonConstructableGenericBaseClass(final Object constructorMagic, final Class<T> memberClass, final int argA) {
         if (!(constructorMagic instanceof ConstructorMagic))
             throw new IllegalArgumentException("Bad magic construction parameter (type mismatch)");
         checkConstructorMagic((ConstructorMagic) constructorMagic);
         fieldA = argA;
+        this.memberClass = memberClass;
     }
 
     public int getFieldA() {
         return fieldA;
     }
+
+    public Class<T> getMemberClass() {
+        return memberClass;
+    }
+
 
     // ConstructorMagic support:
 
