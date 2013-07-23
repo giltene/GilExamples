@@ -19,16 +19,16 @@ public class NonConstructableGenericBaseClass<T> {
     }
 
     public static <C extends NonConstructableGenericBaseClass<T>, T> C
-    newInstance(final Class<C> subClassToConstruct,
-                final Class<T> memberClass,
-                final int argA) throws NoSuchMethodException {
+            newInstance(final Class<C> subClassToConstruct,
+                        final Class<T> memberClass,
+                        final int argA) throws NoSuchMethodException {
         final Constructor<C> constructor = subClassToConstruct.getConstructor(BASECLASS_CONSTRUCTOR_ARG_TYPES);
         return newInstance(constructor, null /* constructorMagic placeholder*/, memberClass, argA);
     }
 
     public static <C extends NonConstructableGenericBaseClass<T>, T> C
-    newInstance(final Constructor<C> constructor,
-                final Object... constructorArgs) throws NoSuchMethodException {
+            newInstance(final Constructor<C> constructor,
+                        final Object... constructorArgs) throws NoSuchMethodException {
         if (constructorArgs.length < 2) {
             throw new IllegalArgumentException("Constructor must have 2 or more args");
         }

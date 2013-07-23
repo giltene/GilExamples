@@ -12,7 +12,7 @@ public class NonConstructableSubClass extends NonConstructableBaseClass {
     public static NonConstructableSubClass newInstance(int argA, int argB, int argC)
             throws NoSuchMethodException {
         return NonConstructableBaseClass.newInstance(fullConstructor,
-                null /* constructorMagic */, argA, argB, argC);
+                                                     null /* constructorMagic */, argA, argB, argC);
     }
 
     public NonConstructableSubClass(Object constructorMagic, int argA, int argB, int argC) {

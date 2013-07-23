@@ -19,8 +19,8 @@ public class NonConstructableBaseClass {
         return newInstance(constructor, null /* constructorMagic placeholder */, argA);
     }
 
-    public static <C extends NonConstructableBaseClass> C  newInstance(final Constructor<C> constructor,
-                                                                       final Object... constructorArgs) throws NoSuchMethodException {
+    public static <C extends NonConstructableBaseClass> C newInstance(final Constructor<C> constructor,
+                                                                      final Object... constructorArgs) throws NoSuchMethodException {
         if (constructorArgs.length < 2) {
             throw new IllegalArgumentException("Constructor must have 2 or more args");
         }
