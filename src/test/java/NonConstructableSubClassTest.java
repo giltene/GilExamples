@@ -1,12 +1,8 @@
 import org.junit.Test;
 
-import java.util.Observable;
-
-import static java.lang.Long.valueOf;
 import static java.lang.Integer.valueOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class NonConstructableSubClassTest {
     @Test

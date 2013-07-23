@@ -28,6 +28,7 @@ public class NonConstructableGenericSubClassTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldCreateBaseClassInstanceEvenWithSubclassNewInstance() throws NoSuchMethodException {
         final NonConstructableGenericBaseClass<Long> instance =
                 NonConstructableGenericBaseClass.newInstance(NonConstructableGenericBaseClass.class, Long.class, 5);

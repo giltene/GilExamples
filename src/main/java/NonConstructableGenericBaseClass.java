@@ -32,6 +32,7 @@ public class NonConstructableGenericBaseClass<T> {
         if (constructorArgs.length < 2) {
             throw new IllegalArgumentException("Constructor must have 2 or more args");
         }
+
         final ConstructorMagic constructorMagic = new ConstructorMagic();
         try {
             activeMagicObjects.add(constructorMagic);
@@ -50,9 +51,11 @@ public class NonConstructableGenericBaseClass<T> {
     }
 
     public NonConstructableGenericBaseClass(final Object constructorMagic, final Class<T> memberClass, final int argA) {
-        if (!(constructorMagic instanceof ConstructorMagic))
+        if (!(constructorMagic instanceof ConstructorMagic)) {
             throw new IllegalArgumentException("Bad magic construction parameter (type mismatch)");
+        }
         checkConstructorMagic((ConstructorMagic) constructorMagic);
+
         fieldA = argA;
         this.memberClass = memberClass;
     }
@@ -66,8 +69,6 @@ public class NonConstructableGenericBaseClass<T> {
     }
 
 
-    // ConstructorMagic support:
-
     private static class ConstructorMagic {
         private final Thread thread = Thread.currentThread();
         Thread getThread() {
@@ -79,10 +80,13 @@ public class NonConstructableGenericBaseClass<T> {
             Collections.synchronizedSet(new HashSet<ConstructorMagic>());
 
     private static void checkConstructorMagic(final ConstructorMagic magic) {
-        if (magic.getThread() != Thread.currentThread())
+        if (magic.getThread() != Thread.currentThread()) {
             throw new IllegalArgumentException("Bad magic construction parameter (thread mismatch)");
-        if (!activeMagicObjects.contains(magic))
+        }
+        if (!activeMagicObjects.contains(magic)) {
             throw new IllegalArgumentException("Bad magic construction parameter (not in active set)");
+        }
+
         activeMagicObjects.remove(magic);
     }
 }
