@@ -52,7 +52,7 @@ public class BogusPauseReportingDemo {
         copier.start();
         try {
             Thread.sleep(runTimeMsec);
-        } catch (InterruptedException ex) {
+        } catch (InterruptedException ignore) {
 
         }
 

@@ -12,7 +12,7 @@ public class NonConstructableSubClassWithStringMember extends NonConstructableGe
     public static NonConstructableSubClassWithStringMember newInstance(int argA, int argB, int argC)
             throws NoSuchMethodException {
         return NonConstructableGenericBaseClass.newInstance(fullConstructor,
-                        null /* magic placeholder */, String.class, argA, argB, argC);
+                                                            null /* magic placeholder */, String.class, argA, argB, argC);
     }
 
     public NonConstructableSubClassWithStringMember(Object constructorMagic, Class<String> memberClass, int argA,

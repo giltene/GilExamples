@@ -19,19 +19,20 @@ public class NonConstructableGenericBaseClass<T> {
     }
 
     public static <C extends NonConstructableGenericBaseClass<T>, T> C
-    newInstance(final Class<C> subClassToConstruct,
-                final Class<T> memberClass,
-                final int argA) throws NoSuchMethodException {
+            newInstance(final Class<C> subClassToConstruct,
+                        final Class<T> memberClass,
+                        final int argA) throws NoSuchMethodException {
         final Constructor<C> constructor = subClassToConstruct.getConstructor(BASECLASS_CONSTRUCTOR_ARG_TYPES);
         return newInstance(constructor, null /* constructorMagic placeholder*/, memberClass, argA);
     }
 
     public static <C extends NonConstructableGenericBaseClass<T>, T> C
-    newInstance(final Constructor<C> constructor,
-                final Object... constructorArgs) throws NoSuchMethodException {
+            newInstance(final Constructor<C> constructor,
+                        final Object... constructorArgs) throws NoSuchMethodException {
         if (constructorArgs.length < 2) {
             throw new IllegalArgumentException("Constructor must have 2 or more args");
         }
+
         final ConstructorMagic constructorMagic = new ConstructorMagic();
         try {
             activeMagicObjects.add(constructorMagic);
@@ -50,9 +51,11 @@ public class NonConstructableGenericBaseClass<T> {
     }
 
     public NonConstructableGenericBaseClass(final Object constructorMagic, final Class<T> memberClass, final int argA) {
-        if (!(constructorMagic instanceof ConstructorMagic))
+        if (!(constructorMagic instanceof ConstructorMagic)) {
             throw new IllegalArgumentException("Bad magic construction parameter (type mismatch)");
+        }
         checkConstructorMagic((ConstructorMagic) constructorMagic);
+
         fieldA = argA;
         this.memberClass = memberClass;
     }
@@ -66,8 +69,6 @@ public class NonConstructableGenericBaseClass<T> {
     }
 
 
-    // ConstructorMagic support:
-
     private static class ConstructorMagic {
         private final Thread thread = Thread.currentThread();
         Thread getThread() {
@@ -79,10 +80,13 @@ public class NonConstructableGenericBaseClass<T> {
             Collections.synchronizedSet(new HashSet<ConstructorMagic>());
 
     private static void checkConstructorMagic(final ConstructorMagic magic) {
-        if (magic.getThread() != Thread.currentThread())
+        if (magic.getThread() != Thread.currentThread()) {
             throw new IllegalArgumentException("Bad magic construction parameter (thread mismatch)");
-        if (!activeMagicObjects.contains(magic))
+        }
+        if (!activeMagicObjects.contains(magic)) {
             throw new IllegalArgumentException("Bad magic construction parameter (not in active set)");
+        }
+
         activeMagicObjects.remove(magic);
     }
 }
