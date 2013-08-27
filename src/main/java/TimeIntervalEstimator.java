@@ -35,6 +35,11 @@ public class TimeIntervalEstimator {
     }
 
     public long getAverageInterval() {
+        return (long) timeIntervals.getAverage();
+    }
+
+
+    public long getAverageIntervalWithoutOutliers() {
         return (long) timeIntervalsWithoutOutliers.getAverage();
     }
 
