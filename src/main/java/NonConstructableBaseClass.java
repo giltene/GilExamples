@@ -1,8 +1,6 @@
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NonConstructableBaseClass {
     private final int fieldA;
@@ -27,7 +25,7 @@ public class NonConstructableBaseClass {
 
         final ConstructorMagic constructorMagic = new ConstructorMagic();
         try {
-            activeMagicObjects.add(constructorMagic);
+            activeMagicObjects.put(constructorMagic, constructorMagic);
             constructorArgs[0] = constructorMagic;
             return constructor.newInstance(constructorArgs);
         } catch (final InstantiationException ex) {
@@ -64,17 +62,15 @@ public class NonConstructableBaseClass {
         }
     }
 
-    private static final Set<ConstructorMagic> activeMagicObjects =
-            Collections.synchronizedSet(new HashSet<ConstructorMagic>());
+    private static final ConcurrentHashMap<ConstructorMagic, ConstructorMagic> activeMagicObjects =
+            new ConcurrentHashMap<ConstructorMagic, ConstructorMagic>();
 
     private static void checkConstructorMagic(final ConstructorMagic magic) {
         if (magic.getThread() != Thread.currentThread()) {
             throw new IllegalArgumentException("Bad magic construction parameter (thread mismatch)");
         }
-        if (!activeMagicObjects.contains(magic)) {
+        if (activeMagicObjects.remove(magic) == null) {
             throw new IllegalArgumentException("Bad magic construction parameter (not in active set)");
         }
-
-        activeMagicObjects.remove(magic);
     }
 }
