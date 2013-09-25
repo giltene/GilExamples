@@ -15,18 +15,17 @@ public class NonConstructableGenericSubClass<T> extends NonConstructableGenericB
     public static <T> NonConstructableGenericSubClass<T> newInstance(Class<T> memberClass, int argA, int argB, int argC)
             throws NoSuchMethodException {
         return (NonConstructableGenericSubClass<T>)
-                NonConstructableGenericBaseClass.newInstance(fullConstructor,
-                        null /* magic placeholder */, memberClass, argA, argB, argC);
+                NonConstructableGenericBaseClass.newInstance(fullConstructor, memberClass, argA, argB, argC);
     }
 
-    public NonConstructableGenericSubClass(Object constructorMagic, Class<T> memberClass, int argA, int argB, int argC) {
-        super(constructorMagic, memberClass, argA);
+    public NonConstructableGenericSubClass(Class<T> memberClass, int argA, int argB, int argC) {
+        super(memberClass, argA);
         fieldB = argB;
         fieldC = argC;
     }
 
-    public NonConstructableGenericSubClass(Object constructorMagic, Class<T> memberClass, int argA) {
-        super(constructorMagic, memberClass, argA);
+    public NonConstructableGenericSubClass(Class<T> memberClass, int argA) {
+        super(memberClass, argA);
         fieldB = 7;
         fieldC = 17;
     }
@@ -39,7 +38,7 @@ public class NonConstructableGenericSubClass<T> extends NonConstructableGenericB
         return fieldC;
     }
 
-    static final Class[] fullConstructorArgTypes = {Object.class /* magic*/, Class.class, int.class, int.class, int.class};
+    static final Class[] fullConstructorArgTypes = {Class.class, int.class, int.class, int.class};
     static final Constructor<NonConstructableGenericSubClass> fullConstructor;
 
     static {

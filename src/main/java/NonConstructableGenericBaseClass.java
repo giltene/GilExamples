@@ -8,14 +8,14 @@ public class NonConstructableGenericBaseClass<T> {
     private final int fieldA;
     private final Class<T> memberClass;
 
-    private static final Class[] BASECLASS_CONSTRUCTOR_ARG_TYPES = { Object.class, Class.class, int.class };
+    private static final Class[] BASECLASS_CONSTRUCTOR_ARG_TYPES = { Class.class, int.class };
 
     @SuppressWarnings("unchecked")
     public static <T> NonConstructableGenericBaseClass<T> newInstance(final Class<T> memberClass,
                                                                       final int argA) throws NoSuchMethodException {
         final Constructor<NonConstructableGenericBaseClass> constructor =
                 NonConstructableGenericBaseClass.class.getConstructor(BASECLASS_CONSTRUCTOR_ARG_TYPES);
-        return newInstance(constructor, null /* constructorMagic placeholder*/, memberClass, argA);
+        return newInstance(constructor, memberClass, argA);
     }
 
     public static <C extends NonConstructableGenericBaseClass<T>, T> C
@@ -23,20 +23,18 @@ public class NonConstructableGenericBaseClass<T> {
                         final Class<T> memberClass,
                         final int argA) throws NoSuchMethodException {
         final Constructor<C> constructor = subClassToConstruct.getConstructor(BASECLASS_CONSTRUCTOR_ARG_TYPES);
-        return newInstance(constructor, null /* constructorMagic placeholder*/, memberClass, argA);
+        return newInstance(constructor, memberClass, argA);
     }
 
     public static <C extends NonConstructableGenericBaseClass<T>, T> C
             newInstance(final Constructor<C> constructor,
                         final Object... constructorArgs) throws NoSuchMethodException {
-        if (constructorArgs.length < 2) {
+        if (constructorArgs.length < 1) {
             throw new IllegalArgumentException("Constructor must have 2 or more args");
         }
 
-        final ConstructorMagic constructorMagic = new ConstructorMagic();
+        threadLocalConstructorMagic.set(new ConstructorMagic());
         try {
-            activeMagicObjects.add(constructorMagic);
-            constructorArgs[0] = constructorMagic;
             return constructor.newInstance(constructorArgs);
         } catch (final InstantiationException ex) {
             throw new RuntimeException(ex);
@@ -46,15 +44,12 @@ public class NonConstructableGenericBaseClass<T> {
             throw new RuntimeException(ex);
         } finally {
             // Get rid of the constructorMagic in all cases, just in case someone tries to cache and cheat:
-            activeMagicObjects.remove(constructorMagic);
+            threadLocalConstructorMagic.set(null);
         }
     }
 
-    public NonConstructableGenericBaseClass(final Object constructorMagic, final Class<T> memberClass, final int argA) {
-        if (!(constructorMagic instanceof ConstructorMagic)) {
-            throw new IllegalArgumentException("Bad magic construction parameter (type mismatch)");
-        }
-        checkConstructorMagic((ConstructorMagic) constructorMagic);
+    public NonConstructableGenericBaseClass(final Class<T> memberClass, final int argA) {
+        checkConstructorMagic();
 
         fieldA = argA;
         this.memberClass = memberClass;
@@ -68,25 +63,16 @@ public class NonConstructableGenericBaseClass<T> {
         return memberClass;
     }
 
-
     private static class ConstructorMagic {
-        private final Thread thread = Thread.currentThread();
-        Thread getThread() {
-            return thread;
-        }
     }
 
-    private static final Set<ConstructorMagic> activeMagicObjects =
-            Collections.synchronizedSet(new HashSet<ConstructorMagic>());
+    private static final ThreadLocal<ConstructorMagic> threadLocalConstructorMagic = new ThreadLocal<ConstructorMagic>();
 
-    private static void checkConstructorMagic(final ConstructorMagic magic) {
-        if (magic.getThread() != Thread.currentThread()) {
-            throw new IllegalArgumentException("Bad magic construction parameter (thread mismatch)");
-        }
-        if (!activeMagicObjects.contains(magic)) {
+    private static void checkConstructorMagic() {
+        final ConstructorMagic constructorMagic = threadLocalConstructorMagic.get();
+        threadLocalConstructorMagic.set(null);
+        if (constructorMagic == null) {
             throw new IllegalArgumentException("Bad magic construction parameter (not in active set)");
         }
-
-        activeMagicObjects.remove(magic);
     }
 }

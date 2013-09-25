@@ -12,19 +12,18 @@ public class NonConstructableSubClassWithStringMember extends NonConstructableGe
     public static NonConstructableSubClassWithStringMember newInstance(int argA, int argB, int argC)
             throws NoSuchMethodException {
         return NonConstructableGenericBaseClass.newInstance(fullConstructor,
-                                                            null /* magic placeholder */, String.class, argA, argB, argC);
+                                                            String.class, argA, argB, argC);
     }
 
-    public NonConstructableSubClassWithStringMember(Object constructorMagic, Class<String> memberClass, int argA,
-                                                    int argB,
-                                                    int argC) {
-        super(constructorMagic, memberClass, argA);
+    public NonConstructableSubClassWithStringMember(Class<String> memberClass,
+                                                    int argA, int argB, int argC) {
+        super(memberClass, argA);
         fieldB = argB;
         fieldC = argC;
     }
 
-    public NonConstructableSubClassWithStringMember(Object constructorMagic, Class<String> memberClass, int argA) {
-        super(constructorMagic, memberClass, argA);
+    public NonConstructableSubClassWithStringMember(Class<String> memberClass, int argA) {
+        super(memberClass, argA);
         fieldB = 7;
         fieldC = 17;
     }
@@ -37,7 +36,7 @@ public class NonConstructableSubClassWithStringMember extends NonConstructableGe
         return fieldC;
     }
 
-    static final Class[] fullConstructorArgTypes = {Object.class /* magic*/, Class.class, int.class, int.class, int.class};
+    static final Class[] fullConstructorArgTypes = {Class.class, int.class, int.class, int.class};
     static final Constructor<NonConstructableSubClassWithStringMember> fullConstructor;
 
     static {

@@ -4,6 +4,12 @@ public class NonConstructableSubClass extends NonConstructableBaseClass {
     private final int fieldB;
     private final int fieldC;
 
+    public static NonConstructableSubClass newInstance()
+            throws NoSuchMethodException {
+        return NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, 5);
+    }
+
+
     public static NonConstructableSubClass newInstance(int argA)
             throws NoSuchMethodException {
         return NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, argA);
@@ -11,18 +17,17 @@ public class NonConstructableSubClass extends NonConstructableBaseClass {
 
     public static NonConstructableSubClass newInstance(int argA, int argB, int argC)
             throws NoSuchMethodException {
-        return NonConstructableBaseClass.newInstance(fullConstructor,
-                                                     null /* constructorMagic */, argA, argB, argC);
+        return NonConstructableBaseClass.newInstance(fullConstructor, argA, argB, argC);
     }
 
-    public NonConstructableSubClass(Object constructorMagic, int argA, int argB, int argC) {
-        super(constructorMagic, argA);
+    public NonConstructableSubClass(int argA, int argB, int argC) {
+        super(argA);
         fieldB = argB;
         fieldC = argC;
     }
 
-    public NonConstructableSubClass(Object constructorMagic, int argA) {
-        super(constructorMagic, argA);
+    public NonConstructableSubClass(int argA) {
+        super(argA);
         fieldB = 7;
         fieldC = 17;
     }
@@ -35,7 +40,7 @@ public class NonConstructableSubClass extends NonConstructableBaseClass {
         return fieldC;
     }
 
-    static final Class[] fullConstructorArgTypes = {Object.class /* magic*/, int.class, int.class, int.class};
+    static final Class[] fullConstructorArgTypes = {int.class, int.class, int.class};
     static final Constructor<NonConstructableSubClass> fullConstructor;
 
     static {
