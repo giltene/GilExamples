@@ -20,6 +20,18 @@
  */
 
 
+/**
+ * PauselessHashMap: A java.util.HashMap compatible HashMap implementation that
+ * performs background resizing for inserts, avoiding the common "resize/rehash"
+ * outlier experienced by normal HashMap.s
+ *
+ * Like HashMap, PauselessHashMap provides no synchronization or thread-safe
+ * behaviors on it's own, and MUST be externally synchronized if used by multiple
+ * threads. The background resizing mechanism relies on the calling program
+ * enforcing serialized access to all methods, and behavior is undefined if
+ * concurrent access (for modification or otherwise) is allowed.
+ *
+ */
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -30,7 +42,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * HashMap is an implementation of Map. All optional operations (adding and
@@ -106,7 +117,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     transient boolean indicatedObservedResizingIntoTable = false;
     transient volatile boolean observedResizingIntoTable = false;
 
-    transient AtomicBoolean updatedMainDataSet = new AtomicBoolean();
+    transient AtomicBoolean volatileUpdateIndicator = new AtomicBoolean(false);
 
     transient final Object rehashMonitor = new Object();
 
@@ -171,9 +182,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             expectedModCount = hm.modCount;
             futureEntry = null;
             // Make sure any pending resize operation completes before we start this:
-            if (associatedMap.pendingResize) {
-                associatedMap.finishResizing();
-            }
+            associatedMap.forceFinishResizing();
         }
 
         public boolean hasNext() {
@@ -301,7 +310,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 return removeImpl(object);
             }
             synchronized (associatedMap.rehashMonitor) {
-                associatedMap.finishResizing();
+                associatedMap.forceFinishResizing();
                 return removeImpl(object);
             }
         }
@@ -447,7 +456,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             clearImpl();
         } else {
             synchronized (rehashMonitor) {
-                finishResizing();
+                forceFinishResizing();
                 clearImpl();
             }
         }
@@ -475,7 +484,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             return cloneImpl();
         } else {
             synchronized (rehashMonitor) {
-                finishResizing();
+                forceFinishResizing();
                 return cloneImpl();
             }
         }
@@ -725,7 +734,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                         entry = PauselessHashMap.this.removeEntry(key);
                     } else {
                         synchronized (rehashMonitor) {
-                            PauselessHashMap.this.finishResizing();
+                            PauselessHashMap.this.forceFinishResizing();
                             entry = PauselessHashMap.this.removeEntry(key);
                         }
                     }
@@ -808,7 +817,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             result = entry.value;
             entry.value = value;
             // Need to force a StoreStore fence here to order against next update:
-            updatedMainDataSet.lazySet(true);
+            volatileUpdateIndicator.lazySet(true);
         }
 
         if(key == null) {
@@ -840,18 +849,12 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         return result;
     }
 
-    void finishResizing() {
+    void forceFinishResizing() {
         while (pendingResize) {
             try {
                 synchronized (rehashMonitor) {
                     if (backgroundResizeComplete) {
-                        elementData = resizingIntoElementData;
-                        resizingIntoElementData = null;
-                        observedResizingIntoTable = false;
-                        indicatedObservedResizingIntoTable = false;
-                        backgroundResizeComplete = false;
-                        pendingResize = false;
-                        updatedMainDataSet.lazySet(false);
+                        finishResizing();
                     } else {
                         if (resizingIntoElementData != null) {
                             observedResizingIntoTable = true;
@@ -863,6 +866,16 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             } catch (InterruptedException e) {
             }
         }
+    }
+
+    void finishResizing() {
+        elementData = resizingIntoElementData;
+        resizingIntoElementData = null;
+        observedResizingIntoTable = false;
+        indicatedObservedResizingIntoTable = false;
+        backgroundResizeComplete = false;
+        pendingResize = false;
+        volatileUpdateIndicator.lazySet(false);
     }
 
 
@@ -884,7 +897,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             do {
                 currentHead = resizingIntoElementData[indexInResizedArray];
                 entry.next = currentHead;
-            } while (!EntryArray.compareAndSet(resizingIntoElementData, indexInResizedArray, currentHead, entry));
+            } while (!EntryArrayHelper.compareAndSet(resizingIntoElementData, indexInResizedArray, currentHead, entry));
 
             return entry;
         }
@@ -913,7 +926,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     private void putAllImpl(Map<? extends K, ? extends V> map) {
         if (resizingIntoElementData != null) {
             if (backgroundResizeComplete) {
-                finishResizing();
+                forceFinishResizing();
             }
         }
         int capacity = elementCount + map.size();
@@ -952,7 +965,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             return removeImpl(key);
         }
         synchronized (rehashMonitor) {
-            finishResizing();
+            forceFinishResizing();
             return removeImpl(key);
         }
     }
@@ -1084,7 +1097,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         synchronized (rehashMonitor) {
-            finishResizing();
+            forceFinishResizing();
             stream.defaultWriteObject();
             stream.writeInt(elementData.length);
             stream.writeInt(elementCount);
@@ -1194,7 +1207,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         }
     }
 
-    static class EntryArray {
+    static class EntryArrayHelper {
         // A static access helper for an Entry[] that uses Unsafe for speed. Provides method compatibility
         // with same-named version aimed for use with AtomicReferenceArray arrays and no Unsafe.
 
@@ -1257,8 +1270,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                     resizingIntoElementData = newElementArray(length);
                 }
                 // Force a full fence:
-                boolval = updatedMainDataSet.get();
-                updatedMainDataSet.set(!boolval);
+                boolval = volatileUpdateIndicator.get();
+                volatileUpdateIndicator.set(!boolval);
 
                 if (isSynchronous) {
                     observedResizingIntoTable = true;
@@ -1286,7 +1299,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                         do {
                             currentHead = resizingIntoElementData[index];
                             newEntry.next = currentHead;
-                        } while (!EntryArray.compareAndSet(resizingIntoElementData, index, currentHead, newEntry));
+                        } while (!EntryArrayHelper.compareAndSet(resizingIntoElementData, index, currentHead, newEntry));
 
                         // there is a StoreStore fence ahead of here due to the CAS above
 
@@ -1294,7 +1307,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                         newEntry.value = existingEntry.value; // Existing entry May have been changed by racing put() call.
 
                         // Force a StoreStore fence:
-                        updatedMainDataSet.lazySet(!boolval);
+                        volatileUpdateIndicator.lazySet(!boolval);
 
                         newEntry.setValid();
                         existingEntry = existingEntry.next;
@@ -1303,7 +1316,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 }
 
                 // Force a StoreStore fence:
-                updatedMainDataSet.lazySet(!boolval);
+                volatileUpdateIndicator.lazySet(!boolval);
 
                 computeThreshold();
                 backgroundResizeComplete = true;
@@ -1338,10 +1351,10 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         // induces more concurrency (but also avoids potential races around first observation):
 
         while (resizingIntoElementData == null) {
-            updatedMainDataSet.set(!updatedMainDataSet.get());
+            volatileUpdateIndicator.set(!volatileUpdateIndicator.get());
         }
         observedResizingIntoTable = true;
-        updatedMainDataSet.set(!updatedMainDataSet.get());
+        volatileUpdateIndicator.set(!volatileUpdateIndicator.get());
 
 //        // Sleep to give the background resizers time to finish and avoid concurrency
 //        // This is "surprisingly" useful for passing tests ;-).
@@ -1355,9 +1368,11 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     final void doResize(int capacity) {
         Resizer resizer = new Resizer(this, capacity, true /* synchronous */);
         pendingResize = true;
-        resizer.run();
-//        // Synchronously finish resizing to avoid having others deal with it:
-//        finishResizing();
+        synchronized (rehashMonitor) {
+            resizer.run();
+            // Synchronously finish resizing to avoid having others deal with it:
+            finishResizing();
+        }
     }
 
 }
