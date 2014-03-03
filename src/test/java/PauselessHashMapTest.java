@@ -26,12 +26,10 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-// import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 //import org.apache.harmony.testframework.serialization.SerializationTest;
 
@@ -98,7 +96,6 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
 
     PauselessHashMap hm;
 
-//    final static int hmSize = 1000;
     final static int hmSize = 1000;
 
     static Object[] objArray;
@@ -172,16 +169,16 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     public void test_ConstructorLjava_util_Map() {
         // Test for method java.util.PauselessHashMap(java.util.Map)
         Map myMap = new TreeMap();
-        assertTrue("Missed an insert of 10", hm.get(objArray2[10]) != null);
+        Object o0;
 
-        for (int counter = 0; counter < hmSize; counter++)
-            myMap.put(objArray2[counter], objArray[counter]);
-        PauselessHashMap hm2 = new PauselessHashMap(myMap);
         for (int counter = 0; counter < hmSize; counter++) {
-            Object o1 = hm.get(objArray2[counter]);
-            Object o2 = hm2.get(objArray2[counter]);
+            myMap.put(objArray2[counter], objArray[counter]);
+        }
 
-            assertTrue("Failed to construct correct PauselessHashMap @counter = " + counter + ", o1 = " + o1 + ", o2 = " + o2,
+        PauselessHashMap hm2 = new PauselessHashMap(myMap);
+
+        for (int counter = 0; counter < hmSize; counter++) {
+            assertTrue("Failed to construct correct PauselessHashMap @counter = " + counter,
                     hm.get(objArray2[counter]) == hm2.get(objArray2[counter]));
         }
 
@@ -777,11 +774,10 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
             if (hm.size() != i+1) {
                 assertTrue("Missed an insert", hm.size() == i+1);
             }
-            if (objArray[i].equals(10)) {
-                assertTrue("Missed an insert of 10", hm.get(objArray2[i]) != null);
-            }
         }
-        assertTrue("Missed an insert of 10", hm.get(objArray2[10]) != null);
+        if (hm.get(objArray2[10]) == null) {
+            assertTrue("Missed an insert of 10", hm.get(objArray2[10]) != null);
+        }
 
         hm.put("test", null);
         hm.put(null, "test");
