@@ -19,19 +19,6 @@
  * Written by Gil Tene, based on Apache Harmony version of java.util.HashMap.
  */
 
-
-/**
- * PauselessHashMap: A java.util.HashMap compatible HashMap implementation that
- * performs background resizing for inserts, avoiding the common "resize/rehash"
- * outlier experienced by normal HashMap.s
- *
- * Like HashMap, PauselessHashMap provides no synchronization or thread-safe
- * behaviors on it's own, and MUST be externally synchronized if used by multiple
- * threads. The background resizing mechanism relies on the calling program
- * enforcing serialized access to all methods, and behavior is undefined if
- * concurrent access (for modification or otherwise) is allowed.
- *
- */
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -44,8 +31,24 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * HashMap is an implementation of Map. All optional operations (adding and
- * removing) are supported. Keys and values can be any objects.
+ * PauselessHashMap: A java.util.HashMap compatible Map implementation that
+ * performs background resizing for inserts, avoiding the common "resize/rehash"
+ * outlier experienced by normal HashMap.
+ * <p>
+ * get() and put() operations are "pauseless" in the sense that they do not
+ * block during resizing of the map. Other operations, like remove(), putAll(),
+ * clear(), and the derivination of keysets and such *will* block for pending
+ * resize operations.
+ * <p>
+ * Like HashMap, PauselessHashMap provides no synchronization or thread-safe
+ * behaviors on it's own, and MUST be externally synchronized if used by multiple
+ * threads. The background resizing mechanism relies on the calling program
+ * enforcing serialized access to all methods, and behavior is undefined if
+ * concurrent access (for modification or otherwise) is allowed.
+ * <p>
+ * And like HashMap, PauselessHashMap is an implementation of Map. All optional
+ * operations (adding and removing) are supported. Keys and values can be any objects.
+ *
  */
 public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implements Map<K, V>,
         Cloneable, Serializable {
@@ -64,13 +67,12 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     /*
      * The internal data structure to hold Entries
      */
-    // transient Entry<K, V>[] elementData;
-    transient Entry<K, V> elementData[];
+    transient Entry<K, V>[] elementData;
 
     /*
-     * The target data structure for holding Entries in a resizing map:
+     * The target data structure for holding Entries during resizing:
      */
-    transient Entry<K, V> resizingIntoElementData[];
+    transient Entry<K, V>[] resizingIntoElementData;
 
     /*
      * modification count, to keep track of structural modifications between the
@@ -102,23 +104,32 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     transient boolean pendingResize = false;
 
     /*
-     * backgroundResizeComplete: A true value indicates that the currently in progress
+     * backgroundResizeComplete: A true value indicates that the currently in-progress
      * resizing has completed all background operations.
      */
-    transient boolean backgroundResizeComplete = false;   // Trying hard to not use volatile for this...
+    transient boolean backgroundResizeComplete = false;   // Worked hard to not use volatile reads for this...
+
+    /*
+     * indicatedObservedResizingIntoTable: a non-volatile guard for observedResizingIntoTable.
+     * Helps avoid writing to volatiles in the common case.
+     */
+    transient boolean indicatedObservedResizingIntoTable = false;
 
     /*
      * observedResizingIntoTable: A true value indicates a put operation has observed the
      * resizingIntoTable allocated by background resizers.
-     *
-     * indicatedObservedResizingIntoTable is a non-volatile guard around it that avoids
-     * the volatile read when possible.
      */
-    transient boolean indicatedObservedResizingIntoTable = false;
     transient volatile boolean observedResizingIntoTable = false;
 
+    /*
+     * volatileUpdateIndicator: An atomic boolean used to perform volatile update actions
+     * to enforce ordering (with set, get and lazySet) during background resizing operations.
+     */
     transient AtomicBoolean volatileUpdateIndicator = new AtomicBoolean(false);
 
+    /*
+     * rehashMonitor: serializes background resizing operations against things that need that sort of thing.
+     */
     transient final Object rehashMonitor = new Object();
 
     // keySet and valuesCollection are taken from Apache Harmony's java.util.AbstractMap. They do
@@ -315,7 +326,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             }
         }
 
-        public boolean removeImpl(Object object) {
+        private boolean removeImpl(Object object) {
             if (object instanceof Map.Entry) {
                 Map.Entry<?, ?> oEntry = (Map.Entry<?, ?>) object;
                 Entry<KT,VT> entry = associatedMap.getEntry(oEntry.getKey());
@@ -360,10 +371,6 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     Entry<K, V>[] newElementArray(int s) {
         return new Entry[s];
     }
-
-//    AtomicEntryArray<K, V> newElementArray(int s) {
-//        return new AtomicEntryArray<K, V>(s);
-//    }
 
     /**
      * Constructs a new empty {@code HashMap} instance.
@@ -462,7 +469,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         }
     }
 
-    public void clearImpl() {
+    private void clearImpl() {
         if (elementCount > 0) {
             elementCount = 0;
             // Arrays.fill(elementData, null);
@@ -491,7 +498,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     }
 
     @SuppressWarnings("unchecked")
-    public Object cloneImpl() {
+    private Object cloneImpl() {
         try {
             PauselessHashMap<K, V> map = (PauselessHashMap<K, V>) super.clone();
             map.keySet = null;
@@ -765,7 +772,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         return putImpl(key, value);
     }
 
-    V putImpl(K key, V value) {
+    private V putImpl(K key, V value) {
         Entry<K,V> entry;
         int index = 0;
         int hash = 0;
@@ -970,7 +977,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         }
     }
 
-    public V removeImpl(Object key) {
+    private V removeImpl(Object key) {
         Entry<K, V> entry = removeEntry(key);
         if (entry != null) {
             return entry.value;
@@ -1347,14 +1354,14 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
          * more or less often. It's going away once the kinks are worked out...
          */
 
-        // Loop to observe new array. Helps bring background resizers to the right spot and
-        // induces more concurrency (but also avoids potential races around first observation):
-
-        while (resizingIntoElementData == null) {
-            volatileUpdateIndicator.set(!volatileUpdateIndicator.get());
-        }
-        observedResizingIntoTable = true;
-        volatileUpdateIndicator.set(!volatileUpdateIndicator.get());
+//        // Loop to observe new array. Helps bring background resizers to the right spot and
+//        // induces more concurrency (but also avoids potential races around first observation):
+//
+//        while (resizingIntoElementData == null) {
+//            volatileUpdateIndicator.set(!volatileUpdateIndicator.get());
+//        }
+//        observedResizingIntoTable = true;
+//        volatileUpdateIndicator.set(!volatileUpdateIndicator.get());
 
 //        // Sleep to give the background resizers time to finish and avoid concurrency
 //        // This is "surprisingly" useful for passing tests ;-).
