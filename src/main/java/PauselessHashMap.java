@@ -1429,13 +1429,21 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         pendingResize = true;
         backgroundResizers.execute(new Resizer(this, capacity, false /* non-synchronous */));
 
-        // Loop to observe new array:
+        /* the following code is here to play games with timing, and make bugs happen (or not)
+         * more or less often. It's going away once the kinks are worked out...
+         */
+
+        // Loop to observe new array. Helps bring background resizers to the right spot and
+        // induces more concurrency (but also avoids potential races around first observation):
+
         while (resizingIntoElementData == null) {
             updatedMainDataSet.set(!updatedMainDataSet.get());
         }
         observedResizingIntoTable = true;
         updatedMainDataSet.set(!updatedMainDataSet.get());
 
+//        // Sleep to give the background resizers time to finish and avoid concurrency
+//        // This is "surprisingly" useful for passing tests ;-).
 //        try {
 //            TimeUnit.MILLISECONDS.sleep(20);
 //        } catch (InterruptedException ex) {
@@ -1447,6 +1455,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         Resizer resizer = new Resizer(this, capacity, true /* synchronous */);
         pendingResize = true;
         resizer.run();
+//        // Synchronously finish resizing to avoid having others deal with it:
 //        finishResizing();
     }
 
