@@ -54,14 +54,11 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
      * The internal data structure to hold Entries
      */
     // transient Entry<K, V>[] elementData;
-//    transient AtomicEntryArray<K, V> elementData;
     transient Entry<K, V> elementData[];
 
     /*
      * The target data structure for holding Entries in a resizing map:
      */
-    // transient Entry<K, V>[] resizingIntoElementData;
-//    transient AtomicEntryArray<K, V> resizingIntoElementData;
     transient Entry<K, V> resizingIntoElementData[];
 
     /*
@@ -112,7 +109,6 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     transient AtomicBoolean updatedMainDataSet = new AtomicBoolean();
 
     transient final Object rehashMonitor = new Object();
-    transient final Object rehashBucketMonitor = new Object();
 
     // keySet and valuesCollection are taken from Apache Harmony's java.util.AbstractMap. They do
     // Not exist in Java SE version...
@@ -175,21 +171,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             expectedModCount = hm.modCount;
             futureEntry = null;
             // Make sure any pending resize operation completes before we start this:
-            while (associatedMap.pendingResize) {
-                try {
-                    synchronized (associatedMap.rehashMonitor) {
-                        if (associatedMap.backgroundResizeComplete) {
-                            associatedMap.finishResizing();
-                        } else {
-                            if (associatedMap.resizingIntoElementData != null) {
-                                associatedMap.observedResizingIntoTable = true;
-                            }
-                            // Still in progress or pending, wait for a kick:
-                            associatedMap.rehashMonitor.wait(1);
-                        }
-                    }
-                } catch (InterruptedException e) {
-                }
+            if (associatedMap.pendingResize) {
+                associatedMap.finishResizing();
             }
         }
 
@@ -197,8 +180,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             if (futureEntry != null) {
                 return true;
             }
-            while (position < EntryArray.length(associatedMap.elementData)) {
-                if (EntryArray.get(associatedMap.elementData, position) == null) {
+            while (position < associatedMap.elementData.length) {
+                if (associatedMap.elementData[position] == null) {
                     position++;
                 } else {
                     return true;
@@ -223,7 +206,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 throw new NoSuchElementException();
             }
             if (futureEntry == null) {
-                currentEntry = EntryArray.get(associatedMap.elementData, position++);
+                currentEntry = associatedMap.elementData[position++];
                 futureEntry = currentEntry.next;
                 prevEntry = null;
             } else {
@@ -241,9 +224,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 throw new IllegalStateException();
             }
             if(prevEntry==null){
-                int index = currentEntry.origKeyHash & (EntryArray.length(associatedMap.elementData) - 1);
-                EntryArray.set(associatedMap.elementData, index,
-                        EntryArray.get(associatedMap.elementData, index).next);
+                int index = currentEntry.origKeyHash & (associatedMap.elementData.length - 1);
+                associatedMap.elementData[index] = associatedMap.elementData[index].next;
             } else {
                 prevEntry.next = currentEntry.next;
             }
@@ -318,7 +300,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             if (!associatedMap.pendingResize) {
                 return removeImpl(object);
             }
-            synchronized (associatedMap.rehashBucketMonitor) {
+            synchronized (associatedMap.rehashMonitor) {
+                associatedMap.finishResizing();
                 return removeImpl(object);
             }
         }
@@ -464,6 +447,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             clearImpl();
         } else {
             synchronized (rehashMonitor) {
+                finishResizing();
                 clearImpl();
             }
         }
@@ -473,8 +457,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         if (elementCount > 0) {
             elementCount = 0;
             // Arrays.fill(elementData, null);
-            for (int i = 0; i < EntryArray.length(elementData); i++) {
-                EntryArray.set(elementData, i, null);
+            for (int i = 0; i < elementData.length; i++) {
+                elementData[i] = null;
             }
             modCount++;
         }
@@ -491,10 +475,10 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             return cloneImpl();
         } else {
             synchronized (rehashMonitor) {
+                finishResizing();
                 return cloneImpl();
             }
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -504,7 +488,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             map.keySet = null;
             map.valuesCollection = null;
             map.elementCount = 0;
-            map.elementData = newElementArray(EntryArray.length(elementData));
+            map.elementData = newElementArray(elementData.length);
             map.putAll(this);
 
             return map;
@@ -518,7 +502,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
      */
     private void computeThreshold() {
         Entry<K, V> array[] = (resizingIntoElementData != null) ? resizingIntoElementData : elementData;
-        threshold = (int) (EntryArray.length(array) * loadFactor);
+        threshold = (int) (array.length * loadFactor);
     }
 
     /**
@@ -547,8 +531,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     @SuppressWarnings("unchecked")
     public boolean containsValue(Object value) {
         if (value != null) {
-            for (int i = 0; i < EntryArray.length(elementData); i++) {
-                Entry<K, V> entry = EntryArray.get(elementData, i);
+            for (int i = 0; i < elementData.length; i++) {
+                Entry<K, V> entry = elementData[i];
                 while (entry != null) {
                     if (areEqualValues(value, entry.value)) {
                         return true;
@@ -557,8 +541,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 }
             }
         } else {
-            for (int i = 0; i < EntryArray.length(elementData); i++) {
-                Entry<K, V> entry = EntryArray.get(elementData, i);
+            for (int i = 0; i < elementData.length; i++) {
+                Entry<K, V> entry = elementData[i];
                 while (entry != null) {
                     if (entry.value == null) {
                         return true;
@@ -573,8 +557,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             return false;
 
         if (value != null) {
-            for (int i = 0; i < EntryArray.length(resizingIntoElementData); i++) {
-                Entry<K, V> entry = EntryArray.get(resizingIntoElementData, i);
+            for (int i = 0; i < resizingIntoElementData.length; i++) {
+                Entry<K, V> entry = resizingIntoElementData[i];
                 while (entry != null) {
                     if (areEqualValues(value, entry.value)) {
                         return true;
@@ -583,8 +567,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 }
             }
         } else {
-            for (int i = 0; i < EntryArray.length(resizingIntoElementData); i++) {
-                Entry<K, V> entry = EntryArray.get(resizingIntoElementData, i);
+            for (int i = 0; i < resizingIntoElementData.length; i++) {
+                Entry<K, V> entry = resizingIntoElementData[i];
                 while (entry != null) {
                     if (entry.value == null) {
                         return true;
@@ -632,7 +616,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             m = findNullKeyEntry();
         } else {
             int hash = computeHashCode(key);
-            int index = hash & (EntryArray.length(elementData) - 1);
+            int index = hash & (elementData.length - 1);
             m = findNonNullKeyEntry(key, index, hash);
         }
         return m;
@@ -646,17 +630,19 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         // Look in the resizing into Entry store, if one exists:
         if (resizingIntoElementData == null)
             return null;
-        return findNonNullKeyEntryInResizingIntoElementData(key, index, keyHash);
+
+        int indexInResizedArray = keyHash & (resizingIntoElementData.length - 1);
+        return findNonNullKeyEntryInResizingIntoElementData(key, indexInResizedArray, keyHash);
     }
 
     @SuppressWarnings("unchecked")
     final Entry<K,V> findNonNullKeyEntryInElementData(Object key, int index, int keyHash) {
-        return findNonNullKeyEntryInChain(key, EntryArray.get(elementData, index), keyHash);
+        return findNonNullKeyEntryInChain(key, elementData[index], keyHash);
     }
 
     @SuppressWarnings("unchecked")
     final Entry<K,V> findNonNullKeyEntryInResizingIntoElementData(Object key, int index, int keyHash) {
-        return findNonNullKeyEntryInChain(key, EntryArray.get(resizingIntoElementData, index), keyHash);
+        return findNonNullKeyEntryInChain(key, resizingIntoElementData[index], keyHash);
     }
 
     final Entry<K,V> findNonNullKeyEntryInChain(Object key, Entry<K,V> chainHead, int keyHash) {
@@ -680,12 +666,12 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
 
     @SuppressWarnings("unchecked")
     final Entry<K,V> findNullKeyEntryInElementData() {
-        return findNullKeyEntryInChain(EntryArray.get(elementData, 0));
+        return findNullKeyEntryInChain(elementData[0]);
     }
 
     @SuppressWarnings("unchecked")
     final Entry<K,V> findNullKeyEntryInResizingIntoElementData() {
-        return findNullKeyEntryInChain(EntryArray.get(resizingIntoElementData, 0));
+        return findNullKeyEntryInChain(resizingIntoElementData[0]);
     }
 
     final Entry<K,V> findNullKeyEntryInChain(Entry<K,V> chainHead) {
@@ -738,7 +724,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                     if (!pendingResize) {
                         entry = PauselessHashMap.this.removeEntry(key);
                     } else {
-                        synchronized (rehashBucketMonitor) {
+                        synchronized (rehashMonitor) {
+                            PauselessHashMap.this.finishResizing();
                             entry = PauselessHashMap.this.removeEntry(key);
                         }
                     }
@@ -797,7 +784,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             entry = findNullKeyEntryInElementData();
         } else {
             hash = computeHashCode(key);
-            index = hash & (EntryArray.length(elementData) - 1);
+            index = hash & (elementData.length - 1);
             entry = findNonNullKeyEntryInElementData(key, index, hash);
         }
 
@@ -828,7 +815,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
             entry = findNullKeyEntryInResizingIntoElementData();
         } else {
             hash = computeHashCode(key);
-            index = hash & (EntryArray.length(resizingIntoElementData) - 1);
+            index = hash & (resizingIntoElementData.length - 1);
             entry = findNonNullKeyEntryInResizingIntoElementData(key, index, hash);
         }
 
@@ -854,20 +841,36 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
     }
 
     void finishResizing() {
-        elementData = resizingIntoElementData;
-        resizingIntoElementData = null;
-        observedResizingIntoTable = false;
-        indicatedObservedResizingIntoTable = false;
-        backgroundResizeComplete = false;
-        pendingResize = false;
-        updatedMainDataSet.lazySet(false);
+        while (pendingResize) {
+            try {
+                synchronized (rehashMonitor) {
+                    if (backgroundResizeComplete) {
+                        elementData = resizingIntoElementData;
+                        resizingIntoElementData = null;
+                        observedResizingIntoTable = false;
+                        indicatedObservedResizingIntoTable = false;
+                        backgroundResizeComplete = false;
+                        pendingResize = false;
+                        updatedMainDataSet.lazySet(false);
+                    } else {
+                        if (resizingIntoElementData != null) {
+                            observedResizingIntoTable = true;
+                        }
+                        // Still in progress or pending, wait for a kick:
+                        rehashMonitor.wait(1);
+                    }
+                }
+            } catch (InterruptedException e) {
+            }
+        }
     }
+
 
     @SuppressWarnings("unchecked")
     Entry<K, V> createEntry(K key, int index, V value) {
         Entry<K, V> entry = new Entry<K, V>(key, value);
-        entry.next = EntryArray.get(elementData, index);
-        EntryArray.set(elementData, index, entry);
+        entry.next = elementData[index];
+        elementData[index] = entry;
         return entry;
     }
 
@@ -877,16 +880,16 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         if (resizingIntoElementData != null) {
             // We can be racing with a background resize op. So a CAS is needed:
             Entry<K,V> currentHead;
-            int indexInResizedArray = hash & (EntryArray.length(resizingIntoElementData) - 1);
+            int indexInResizedArray = hash & (resizingIntoElementData.length - 1);
             do {
-                currentHead = EntryArray.get(resizingIntoElementData, indexInResizedArray);
+                currentHead = resizingIntoElementData[indexInResizedArray];
                 entry.next = currentHead;
             } while (!EntryArray.compareAndSet(resizingIntoElementData, indexInResizedArray, currentHead, entry));
 
             return entry;
         }
-        entry.next = EntryArray.get(elementData, index);
-        EntryArray.set(elementData, index, entry);
+        entry.next = elementData[index];
+        elementData[index] = entry;
         return entry;
     }
 
@@ -930,7 +933,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
 
     void rehash() {
         if (!pendingResize) {
-            kickBackgroundResize(EntryArray.length(elementData));
+            kickBackgroundResize(elementData.length);
         }
         // rehash(elementData.length);
     }
@@ -948,7 +951,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         if (!pendingResize) {
             return removeImpl(key);
         }
-        synchronized (rehashBucketMonitor) {
+        synchronized (rehashMonitor) {
+            finishResizing();
             return removeImpl(key);
         }
     }
@@ -968,10 +972,10 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
 
     @SuppressWarnings("unchecked")
     final void removeEntry(Entry<K, V> entry) {
-        int index = entry.origKeyHash & (EntryArray.length(elementData) - 1);
-        Entry<K, V> m = EntryArray.get(elementData, index);
+        int index = entry.origKeyHash & (elementData.length - 1);
+        Entry<K, V> m = elementData[index];
         if (m == entry) {
-            EntryArray.set(elementData, index, entry.next);
+            elementData[index] = entry.next;
         } else {
             while ((m != null) && (m.next != entry)) {
                 m = m.next;
@@ -980,25 +984,6 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 m.next = entry.next;
             }
         }
-        if (resizingIntoElementData == null) {
-            modCount++;
-            elementCount--;
-            return;
-        }
-
-        index = entry.origKeyHash & (EntryArray.length(resizingIntoElementData) - 1);
-        m = EntryArray.get(resizingIntoElementData, index);
-        if (m == entry) {
-            EntryArray.set(resizingIntoElementData, index, entry.next);
-        } else {
-            while ((m != null) && (m.next != entry)) {
-                m = m.next;
-            }
-            if (m != null) {
-                m.next = entry.next;
-            }
-        }
-
         modCount++;
         elementCount--;
     }
@@ -1010,8 +995,8 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         Entry<K, V> last = null;
         if (key != null) {
             int hash = computeHashCode(key);
-            index = hash & (EntryArray.length(elementData) - 1);
-            entryInElementData = EntryArray.get(elementData, index);
+            index = hash & (elementData.length - 1);
+            entryInElementData = elementData[index];
             while (entryInElementData != null &&
                     !(entryInElementData.origKeyHash == hash &&
                             areEqualKeys(key, entryInElementData.key))) {
@@ -1019,7 +1004,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 entryInElementData = entryInElementData.next;
             }
         } else {
-            entryInElementData = EntryArray.get(elementData, 0);
+            entryInElementData = elementData[0];
             while (entryInElementData != null && entryInElementData.key != null) {
                 last = entryInElementData;
                 entryInElementData = entryInElementData.next;
@@ -1027,55 +1012,17 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         }
 
         if (entryInElementData == null) {
-            if (resizingIntoElementData == null) {
-                return null;
-            }
+            return null;
         } else {
             if (last == null) {
-                EntryArray.set(elementData, index, entryInElementData.next);
+                elementData[index] = entryInElementData.next;
             } else {
                 last.next = entryInElementData.next;
             }
-            if (resizingIntoElementData == null) {
-                modCount++;
-                elementCount--;
-                return entryInElementData;
-            }
-        }
-
-        index = 0;
-        Entry<K, V> entryInResizingIntoElementData;
-        last = null;
-
-        if (key != null) {
-            int hash = computeHashCode(key);
-            index = hash & (EntryArray.length(resizingIntoElementData) - 1);
-            entryInResizingIntoElementData = EntryArray.get(resizingIntoElementData, index);
-            while (entryInResizingIntoElementData != null &&
-                    !(entryInResizingIntoElementData.origKeyHash == hash &&
-                            areEqualKeys(key, entryInResizingIntoElementData.key))) {
-                last = entryInResizingIntoElementData;
-                entryInResizingIntoElementData = entryInResizingIntoElementData.next;
-            }
-        } else {
-            entryInResizingIntoElementData = EntryArray.get(resizingIntoElementData, 0);
-            while (entryInResizingIntoElementData != null && entryInResizingIntoElementData.key != null) {
-                last = entryInResizingIntoElementData;
-                entryInResizingIntoElementData = entryInResizingIntoElementData.next;
-            }
-        }
-
-        if (entryInResizingIntoElementData == null) {
+            modCount++;
+            elementCount--;
             return entryInElementData;
         }
-        if (last == null) {
-            EntryArray.set(resizingIntoElementData, index, entryInResizingIntoElementData.next);
-        } else {
-            last.next = entryInResizingIntoElementData.next;
-        }
-        modCount++;
-        elementCount--;
-        return entryInResizingIntoElementData;
     }
 
     /**
@@ -1137,8 +1084,9 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         synchronized (rehashMonitor) {
+            finishResizing();
             stream.defaultWriteObject();
-            stream.writeInt(EntryArray.length(elementData));
+            stream.writeInt(elementData.length);
             stream.writeInt(elementCount);
             Iterator<?> iterator = entrySet().iterator();
             while (iterator.hasNext()) {
@@ -1246,36 +1194,6 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
         }
     }
 
-//
-//    Use AtomicEntryArray and this version of EntryArray if Unsafe is undesireable. The downside is
-//    in the volatile semantics forced on each access, along with an extra dereference to get to the array.
-//
-//    static class AtomicEntryArray<K, V> extends AtomicReferenceArray<Entry<K, V>> {
-//        AtomicEntryArray(int length) {
-//            super(length);
-//        }
-//    }
-//
-//    static class EntryArray {
-//        static int length(AtomicEntryArray array) {
-//            return array.length();
-//        }
-//
-//        static Entry get(AtomicEntryArray array, int index) {
-//            return (Entry) array.get(index);
-//        }
-//
-//        @SuppressWarnings("unchecked")
-//        static void set(AtomicEntryArray array, int index, Entry entry) {
-//            array.set(index, entry);
-//        }
-//
-//        @SuppressWarnings("unchecked")
-//        static boolean compareAndSet(AtomicEntryArray array, int index, Entry expected, Entry entry) {
-//            return array.compareAndSet(index, expected, entry);
-//        }
-//    }
-
     static class EntryArray {
         // A static access helper for an Entry[] that uses Unsafe for speed. Provides method compatibility
         // with same-named version aimed for use with AtomicReferenceArray arrays and no Unsafe.
@@ -1291,18 +1209,12 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
 
         }
 
-        public static int calculateShiftForScale(final int scale)
-        {
-            if (4 == scale)
-            {
+        public static int calculateShiftForScale(final int scale) {
+            if (4 == scale) {
                 return 2;
-            }
-            else if (8 == scale)
-            {
+            } else if (8 == scale) {
                 return 3;
-            }
-            else
-            {
+            } else {
                 throw new IllegalArgumentException("Unknown pointer size");
             }
         }
@@ -1312,20 +1224,9 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                 Field f = Unsafe.class.getDeclaredField("theUnsafe");
                 f.setAccessible(true);
                 return (Unsafe)f.get(null);
-            } catch (Exception e) { /* ... */ }
+            } catch (Exception e) {
+            }
             return null;
-        }
-
-        static int length(Entry[] array) {
-            return array.length;
-        }
-
-        static Entry get(Entry[] array, int index) {
-            return array[index];
-        }
-
-        static void set(Entry[] array, int index, Entry entry) {
-            array[index] = entry;
         }
 
         static boolean compareAndSet(Entry[] array, int index, Entry expected, Entry entry) {
@@ -1352,7 +1253,7 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
 
                 int length = calculateCapacity((capacity == 0 ? 1 : capacity << 1));
 
-                if ((resizingIntoElementData == null) || (EntryArray.length(resizingIntoElementData) < length)) {
+                if ((resizingIntoElementData == null) || (resizingIntoElementData.length < length)) {
                     resizingIntoElementData = newElementArray(length);
                 }
                 // Force a full fence:
@@ -1372,39 +1273,39 @@ public class PauselessHashMap<K, V> extends java.util.AbstractMap<K, V> implemen
                     return;
                 }
 
-                for (int i = 0; i < EntryArray.length(elementData); i++) {
-                    synchronized (rehashBucketMonitor) {
-                        Entry<K, V> existingEntry = EntryArray.get(elementData, i);
+                for (int i = 0; i < elementData.length; i++) {
+                    Entry<K, V> existingEntry = elementData[i];
 
-                        while (existingEntry != null) {
-                            int index = existingEntry.origKeyHash & (length - 1);
-                            Entry<K, V> newEntry = new Entry<K, V>(existingEntry.key, existingEntry.value);
-                            newEntry.setInvalid();
+                    while (existingEntry != null) {
+                        int index = existingEntry.origKeyHash & (length - 1);
+                        Entry<K, V> newEntry = new Entry<K, V>(existingEntry.key, existingEntry.value);
+                        newEntry.setInvalid();
 
-                            // We can be racing with a foreground put op. So a CAS is needed:
-                            Entry<K,V> currentHead;
-                            do {
-                                currentHead = EntryArray.get(resizingIntoElementData, index);
-                                newEntry.next = currentHead;
-                            } while (!EntryArray.compareAndSet(resizingIntoElementData, index, currentHead, newEntry));
+                        // We can be racing with a foreground put op. So a CAS is needed:
+                        Entry<K,V> currentHead;
+                        do {
+                            currentHead = resizingIntoElementData[index];
+                            newEntry.next = currentHead;
+                        } while (!EntryArray.compareAndSet(resizingIntoElementData, index, currentHead, newEntry));
 
-                            // there is a StoreStore fence ahead of here due to the CAS above
+                        // there is a StoreStore fence ahead of here due to the CAS above
 
-                            // From now on, puts to existing entry will be sure to change both entries
-                            newEntry.value = existingEntry.value; // Existing entry May have been changed by racing put() call.
+                        // From now on, puts to existing entry will be sure to change both entries
+                        newEntry.value = existingEntry.value; // Existing entry May have been changed by racing put() call.
 
-                            // Force a StoreStore fence:
-                            updatedMainDataSet.lazySet(!boolval);
+                        // Force a StoreStore fence:
+                        updatedMainDataSet.lazySet(!boolval);
 
-                            newEntry.setValid();
-                            existingEntry = existingEntry.next;
-                        }
-                        EntryArray.set(elementData, i, null);
+                        newEntry.setValid();
+                        existingEntry = existingEntry.next;
                     }
+                    elementData[i] = null;
                 }
-                computeThreshold();
+
                 // Force a StoreStore fence:
                 updatedMainDataSet.lazySet(!boolval);
+
+                computeThreshold();
                 backgroundResizeComplete = true;
                 rehashMonitor.notifyAll(); // Kick anyone waiting for the resize to complete...
             }
