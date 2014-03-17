@@ -4,42 +4,27 @@ public class FunInABox {
     static final int WARMUP_ITERS = THING_ONE_THREASHOLD / 2;
     static final int ITERS = THING_ONE_THREASHOLD * 100;
 
-    static long valueOne = 0;
-    static long valueTwo = 0;
 
     static public class ThingOne {
+        static long valueOne = 0;
+
         static long getValue() {
             return valueOne++;
         }
     }
 
     static public class ThingTwo {
+        static long valueTwo = 3;
+
         static long getValue() {
             return valueTwo++;
         }
     }
 
-    public static <T> Class<T> forceInit(Class<T> klass) {
-        // Forces actual initialization (not just loading) of the class klass:
-        try {
-            Class.forName(klass.getName(), true, klass.getClassLoader());
-        } catch (ClassNotFoundException e) {
-            throw new AssertionError(e);  // Can't happen
-        }
-        return klass;
-    }
-
-    public static void tameTheThings() {
-        forceInit(ThingOne.class);
-        forceInit(ThingTwo.class);
-    }
-
     public static long testRun(int iterations) {
         long sum = 0;
 
-        for(int iter = 0; iter < iterations; iter++)
-        {
-            //if (iter % 20 == 0)
+        for(int iter = 0; iter < iterations; iter++) {
             if (iter > THING_ONE_THREASHOLD)
                 sum += ThingOne.getValue();
             else
@@ -77,5 +62,21 @@ public class FunInABox {
         System.out.println("Test run [" + ITERS + " iterations] took " + (now - startTime) +
                 " msec." + ((sum % 2 == 0) ? "." : "..") );
 
+    }
+
+
+    public static <T> Class<T> forceInit(Class<T> klass) {
+        // Forces actual initialization (not just loading) of the class klass:
+        try {
+            Class.forName(klass.getName(), true, klass.getClassLoader());
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError(e);  // Can't happen
+        }
+        return klass;
+    }
+
+    public static void tameTheThings() {
+        forceInit(ThingOne.class);
+        forceInit(ThingTwo.class);
     }
 }
