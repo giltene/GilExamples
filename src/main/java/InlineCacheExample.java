@@ -47,9 +47,8 @@ public class InlineCacheExample {
         // playWithColorA is monomorphic:
         sum += playWithColorA(thingOneWithColor);
 
-        // playWithColorA is megamorphic:
-        sum += playWithColorB(thingOneWithColor);
-        sum += playWithColorB(thingTwoWithColor);
+        // playWithColorB is megamorphic:
+        sum += playWithColorB(((color & 1) == 1) ? thingOneWithColor : thingTwoWithColor);
 
         return sum;
     }
