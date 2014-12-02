@@ -7,6 +7,7 @@
 
 import org.HdrHistogram.DoubleHistogram;
 import org.HdrHistogram.Histogram;
+import org.apache.commons.math3.distribution.GammaDistribution;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -21,11 +22,14 @@ public class HistogramGenerator extends Thread {
     private final HistogramGeneratorConfiguration config;
 
     private static class HistogramGeneratorConfiguration {
-        public long numPointsInHistogram = 100000000;
+        public long numPointsInHistogram = 10000000;
 
         public double baseLevel = 100.0;
         public double randomLevel = 0.0;
         public double gaussianLevel = 0.0;
+        public double gammaLevel = 0.0;
+        public double gammaShape = 0.0;
+        public double gammaScale = 0.0;
         public double stallLevel = 0.0;
         public double stallLikelihood = 0.0;
         public double backlogCountLevel = 0;
@@ -59,6 +63,12 @@ public class HistogramGenerator extends Thread {
                         randomLevel = Double.parseDouble(args[++i]);
                     } else if (args[i].equals("-gaussianLevel")) {
                         gaussianLevel = Double.parseDouble(args[++i]);
+                    } else if (args[i].equals("-gammaLevel")) {
+                        gammaLevel = Double.parseDouble(args[++i]);
+                    } else if (args[i].equals("-gammaShape")) {
+                        gammaShape = Double.parseDouble(args[++i]);
+                    } else if (args[i].equals("-gammaScale")) {
+                        gammaScale = Double.parseDouble(args[++i]);
                     } else if (args[i].equals("-stallLevel")) {
                         stallLevel = Double.parseDouble(args[++i]);
                     } else if (args[i].equals("-stallLikelihood")) {
@@ -106,6 +116,7 @@ public class HistogramGenerator extends Thread {
                 final String validArgs =
                         "\"[-csv] [-i inputFileName] [-baseLevel baseLevel] " +
                                 "[-randomLevel randomLevel] [-gaussianLevel gaussianLevel] " +
+                                "[-gammaLevel gammaLevel] [-gammaShape gammaShape] [-gammaScale gammaScale] " +
                                 "[-stallLevel stallLevel] [-stallLikelihood stallLikelihood]" +
                                 "[-backlogCountLevel backlogCountLevel] [-backlogLikelihood backlogLikelihood]" +
                                 "[-interval interval]";
@@ -127,11 +138,15 @@ public class HistogramGenerator extends Thread {
         Double firstStartTime = 0.0;
         boolean timeIntervalLogLegendWritten = false;
 
-        DoubleHistogram histogram = new DoubleHistogram(1_000_000_000_000L, 4);
+        DoubleHistogram histogram = new DoubleHistogram(3);
         Random random = new Random(42);
         Random stallRandom = new Random(42);
         Random backlogRandom = new Random(42);
         Random modeRandom = new Random(42);
+        GammaDistribution gammaDistribution =
+                ((config.gammaShape > 0) && (config.gammaScale > 0) && (config.gammaLevel > 0)) ?
+                        new GammaDistribution(config.gammaShape, config.gammaScale) :
+                        null;
         double stallComponent = 0;
         long backlogCount = 0;
         long backlogPosition = 0;
@@ -187,6 +202,12 @@ public class HistogramGenerator extends Thread {
 
             if (config.gaussianLevel != 0) {
                 value += (random.nextGaussian() + 1.0) * config.gaussianLevel;
+                value = Math.min(value, 1_000_000_000L);
+                value = Math.max(value, 0);
+            }
+
+            if (gammaDistribution != null) {
+                value += gammaDistribution.sample() * config.gammaLevel;
                 value = Math.min(value, 1_000_000_000L);
                 value = Math.max(value, 0);
             }
