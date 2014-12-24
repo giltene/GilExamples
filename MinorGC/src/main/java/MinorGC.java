@@ -19,7 +19,7 @@ public class MinorGC extends Thread
     @Override
     public void run() {
         System.gc();
-        for (int l = 0; l < 64; l++) {
+        while(true) {
             Object o = null;
             System.out.println("Start minor GCs:");
             for (int gcCount = 0; gcCount < 5; gcCount++)
