@@ -128,7 +128,7 @@ public class AllocationRateExample extends Thread {
             for (AllocatorThread a : allocators) {
                 sum += a.exposedMap.size();
             }
-            System.out.println("Done.." + ((sum == 1) ? "." : ".."));
+            System.out.println("Done.." + ((sum == 1) ? "." : ""));
 
         } catch (InterruptedException ex) {
         }

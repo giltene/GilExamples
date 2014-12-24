@@ -92,6 +92,4 @@ public class TimeIntervalEstimator {
             return Math.sqrt(numerator / denominator);
         }
     }
-
-
 }

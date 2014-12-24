@@ -26,28 +26,28 @@ public class NonConstructableSubClassTest {
 
     @Test
     public void shouldCreateBaseClassInstanceEvenWithSubclassNewInstance() throws NoSuchMethodException {
-        final NonConstructableBaseClass instance =
-                NonConstructableBaseClass.newInstance(NonConstructableBaseClass.class, 5);
+        final NonConstructableBaseClassWithField instance =
+                NonConstructableBaseClassWithField.newInstance(NonConstructableBaseClassWithField.class, 5);
         assertThat(valueOf(instance.getFieldA()), is(5));
     }
 
     @Test
     public void shouldCreateBaseClassInstance() throws NoSuchMethodException {
-        final NonConstructableBaseClass instance =
-                NonConstructableBaseClass.newInstance(5);
+        final NonConstructableBaseClassWithField instance =
+                NonConstructableBaseClassWithField.newInstance(5);
         assertThat(valueOf(instance.getFieldA()), is(5));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithDefaultParams() throws NoSuchMethodException {
         final NonConstructableSubClass instance =
-                new NonConstructableSubClass(new Object(), 5);
+                new NonConstructableSubClass(5);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithParams() throws NoSuchMethodException {
         final NonConstructableSubClass instance =
-                new NonConstructableSubClass(new Object(), 5, 9, 21);
+                new NonConstructableSubClass(5, 9, 21);
     }
 
 }

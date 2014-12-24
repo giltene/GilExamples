@@ -46,7 +46,7 @@ public class FunInABox {
         sum += testRun(WARMUP_ITERS); // Two warmups, to make not only an OSR version is created.
         long now = System.currentTimeMillis();
         System.out.println("Warmup run [" + WARMUP_ITERS + " iterations] took " + (now - startTime) +
-                " msec." + ((sum % 2 == 0) ? "." : "..") );
+                " msec." + ((sum % 2 == 0) ? "." : "") );
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -60,7 +60,7 @@ public class FunInABox {
         sum = testRun(ITERS);
         now = System.currentTimeMillis();
         System.out.println("Test run [" + ITERS + " iterations] took " + (now - startTime) +
-                " msec." + ((sum % 2 == 0) ? "." : "..") );
+                " msec." + ((sum % 2 == 0) ? "." : "") );
 
     }
 

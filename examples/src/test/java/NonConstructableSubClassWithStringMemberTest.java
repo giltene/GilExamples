@@ -29,13 +29,13 @@ public class NonConstructableSubClassWithStringMemberTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithDefaultParams() throws NoSuchMethodException {
         final NonConstructableSubClassWithStringMember instance =
-                new NonConstructableSubClassWithStringMember(new Object(), String.class, 5);
+                new NonConstructableSubClassWithStringMember(String.class, 5);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithParams() throws NoSuchMethodException {
         final NonConstructableSubClassWithStringMember instance =
-                new NonConstructableSubClassWithStringMember(new Object(), String.class, 5, 9, 21);
+                new NonConstructableSubClassWithStringMember(String.class, 5, 9, 21);
     }
 
 }

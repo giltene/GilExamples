@@ -47,13 +47,13 @@ public class NonConstructableGenericSubClassTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithDefaultParams() throws NoSuchMethodException {
         final NonConstructableGenericSubClass<Object> instance =
-                new NonConstructableGenericSubClass<Object>(new Object(), Object.class, 5);
+                new NonConstructableGenericSubClass<Object>(Object.class, 5);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldFailToConstructWithParams() throws NoSuchMethodException {
         final NonConstructableGenericSubClass<Object> instance =
-                new NonConstructableGenericSubClass<Object>(new Object(), Object.class, 5, 9, 21);
+                new NonConstructableGenericSubClass<Object>(Object.class, 5, 9, 21);
     }
 
 }

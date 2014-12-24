@@ -1,8 +1,5 @@
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 public class NonConstructableGenericBaseClass<T> {
     private final int fieldA;

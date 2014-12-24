@@ -1,23 +1,22 @@
 import java.lang.reflect.Constructor;
 
-public class NonConstructableSubClass extends NonConstructableBaseClass {
+public class NonConstructableSubClass extends NonConstructableBaseClassWithField {
     private final int fieldB;
     private final int fieldC;
 
     public static NonConstructableSubClass newInstance()
             throws NoSuchMethodException {
-        return NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, 5);
+        return NonConstructableBaseClassWithField.newInstance(NonConstructableSubClass.class, 5);
     }
-
 
     public static NonConstructableSubClass newInstance(int argA)
             throws NoSuchMethodException {
-        return NonConstructableBaseClass.newInstance(NonConstructableSubClass.class, argA);
+        return NonConstructableBaseClassWithField.newInstance(NonConstructableSubClass.class, argA);
     }
 
     public static NonConstructableSubClass newInstance(int argA, int argB, int argC)
             throws NoSuchMethodException {
-        return NonConstructableBaseClass.newInstance(fullConstructor, argA, argB, argC);
+        return NonConstructableBaseClassWithField.newInstance(fullConstructor, argA, argB, argC);
     }
 
     public NonConstructableSubClass(int argA, int argB, int argC) {

@@ -46,7 +46,7 @@ public class HistogramGenerator extends Thread {
         public boolean logFormatCsv = false;
 
         public int percentilesOutputTicksPerHalf = 5;
-        public Double outputValueUnitRatio = 1.0;
+        public Double outputValueUnitRatio = 0.001;
 
         public boolean error = false;
         public String errorMessage = "";
