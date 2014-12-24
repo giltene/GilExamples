@@ -10,15 +10,43 @@ import java.util.List;
 
 public class MinorGC extends Thread
 {
+
+    class MinorGCConfiguration {
+        public double refsFraction = 0.0;
+
+        public void parseArgs(String[] args) {
+            try {
+                for (int i = 0; i < args.length; ++i) {
+                    if (args[i].equals("-r")) {
+                        refsFraction = Double.parseDouble(args[++i]);
+                    } else {
+                        throw new Exception("Invalid args");
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Usage: java MinorGC [-r refsFraction]");
+                System.exit(1);
+            }
+        }
+    }
+
     static List<byte[]> list = new ArrayList<byte[]>();
 
+    MinorGCConfiguration config = new MinorGCConfiguration();
+
     protected MinorGC(final String[] args) {
+        config.parseArgs(args);
         this.setDaemon(true);
     }
 
     @Override
     public void run() {
         System.gc();
+
+        long oldArraysAllocated = 0;
+        long oldRefArraysAllocated = 0;
+        int oldArrayLength = 16*1024*1024;
+
         while(true) {
             Object o = null;
             System.out.println("Start minor GCs:");
@@ -29,9 +57,19 @@ public class MinorGC extends Thread
                     o = new byte[1024];
                 }
             }
-            byte[] a = new byte[128*1024*1024];
-            System.out.println("*** allocated a temporary " + a.length / (1024 * 1024) + "MB array.");
-            a = null;
+
+            oldArraysAllocated++;
+            if ((1.0 * oldRefArraysAllocated) / oldArraysAllocated < config.refsFraction) {
+                Object[] refs = new Object[oldArrayLength];
+                oldRefArraysAllocated++;
+                System.out.println("*** allocated a temporary " + refs.length / (1024 * 1024) + "M entry ref array.");
+                for (int i = 0; i < refs.length; i++) {
+                    refs[i] = refs;
+                }
+            } else {
+                int[] ints = new int[oldArrayLength];
+                System.out.println("*** allocated a temporary " + ints.length / (1024 * 1024) + "M entry int array.");
+            }
         }
     }
 
