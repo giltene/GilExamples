@@ -26,7 +26,7 @@ it [newgen collections can't be faster than that]:
 
 To demonstrate the pause time of a newgen when a certain percentage of the
 oldgen is occupied by reference (dead or alive doesn't matter, and non of them
-refer to newgen objects). You can use the [-d refsFraction] option. For example,
+refer to newgen objects). You can use the [-r refsFraction] option. For example,
 you can see what the newgen pauses are when only 2% of the oldgen heap is made up
 of reference fields use the following command:
 
