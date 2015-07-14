@@ -1,5 +1,8 @@
 /**
- * Created by gil on 7/1/15.
+ * Written by Gil Tene of Azul Systems, and released to the public domain,
+ * as explained at http://creativecommons.org/publicdomain/zero/1.0/
+ *
+ * @author Gil Tene
  */
 
 import org.HdrHistogram.Histogram;
@@ -7,7 +10,7 @@ import org.performancehints.SpinHint;
 
 public class SpinHintTest {
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
-    public static final long ITERATIONS = 50L * 1000L * 1000L;
+    public static final long ITERATIONS = 100L * 1000L * 1000L;
 
     public static volatile long s1;
 
@@ -96,8 +99,13 @@ public class SpinHintTest {
             System.out.println("s1 = " + s1 + ", s2 = " + s2);
             System.out.println("\nRound trip latency histogram:\n");
             latencyHistogram.outputPercentileDistribution(System.out, 5, 1.0);
+
+            System.out.println("50%'ile:   " + latencyHistogram.getValueAtPercentile(50.0) + "ns");
+            System.out.println("90%'ile:   " + latencyHistogram.getValueAtPercentile(90.0) + "ns");
+            System.out.println("99%'ile:   " + latencyHistogram.getValueAtPercentile(99.0) + "ns");
+            System.out.println("99.9%'ile: " + latencyHistogram.getValueAtPercentile(99.9) + "ns");
         } catch (InterruptedException ex) {
-            System.err.println("InterThreadLatency interrupted.");
+            System.err.println("SpinHintTest interrupted.");
         }
     }
 
