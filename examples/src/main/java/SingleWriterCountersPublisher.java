@@ -9,15 +9,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.HdrHistogram.WriterReaderPhaser;
 
 /**
- * Publishes a set counter values. Provides a stable, consistent view of those
+ * Publishes a set counter values in a wait-free manner. Provides a stable, consistent view of those
  * live published counters without interrupting or stalling active publishing of values.
  * <p>
  * This pattern is commonly used in logging a set of counters that need to be viewed consistently as
  * a set.
  * <p>
  * {@link SingleWriterCountersPublisher} expects only a single thread (the "single writer") to
- * call {@link SingleWriterCountersPublisher#publicCounters(Counters)} or
- * {@link SingleWriterCountersPublisher#publicCounters(long[])} at any point in time.
+ * call {@link SingleWriterCountersPublisher#publishCounters(Counters)} or
+ * {@link SingleWriterCountersPublisher#publishCounters(long[])} at any point in time.
  * It DOES NOT safely support concurrent publishing calls.
  */
 
@@ -76,7 +76,7 @@ public class SingleWriterCountersPublisher {
      * Publish a set of counters
      * @param counters the counters tonpublish
      */
-    public void publicCounters(final Counters counters) {
+    public void publishCounters(final Counters counters) {
         long criticalValueAtEnter = recordingPhaser.writerCriticalSectionEnter();
         try {
             counters.copyInto(activeCounters);
@@ -89,7 +89,7 @@ public class SingleWriterCountersPublisher {
      * Publish a set of counter values
      * @param counterValues the counter values to publish
      */
-    public void publicCounters(final long[] counterValues) {
+    public void publishCounters(final long[] counterValues) {
         long criticalValueAtEnter = recordingPhaser.writerCriticalSectionEnter();
         try {
             final long[] counters = activeCounters.getCounterValues();
