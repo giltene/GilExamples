@@ -139,7 +139,7 @@ public class SingleWriterCountersPublisher {
         if (countersToRecycle == null) {
             countersToRecycle = new InternalCounters(inactiveCounters);
         }
-        // Verify that replacement histogram can validly be used as an inactive histogram replacement:
+        // Verify that replacement counters can validly be used as an inactive counters replacement:
         validateFitAsReplacementCounters(countersToRecycle);
         try {
             recordingPhaser.readerLock();
@@ -166,15 +166,15 @@ public class SingleWriterCountersPublisher {
             recordingPhaser.readerLock();
 
             // Swap active and inactive counters:
-            final InternalCounters tempHistogram = inactiveCounters;
+            final InternalCounters tempCounters = inactiveCounters;
             inactiveCounters = activeCounters;
-            activeCounters = tempHistogram;
+            activeCounters = tempCounters;
 
             // Mark end time of previous interval and start time of new one:
             long now = System.currentTimeMillis();
             inactiveCounters.setObservationTimeStamp(now);
 
-            // Make sure we are not in the middle of recording a value on the previously active histogram:
+            // Make sure we are not in the middle of recording a value on the previously active counters:
 
             // Flip phase to make sure no recordings that were in flight pre-flip are still active:
             recordingPhaser.flipPhase(500000L /* yield in 0.5 msec units if needed */);
