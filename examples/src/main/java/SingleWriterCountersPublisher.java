@@ -136,19 +136,12 @@ public class SingleWriterCountersPublisher {
      * @return a Counters instance containing the values last published.
      */
     public synchronized Counters getCounters(Counters countersToRecycle) {
-        if (countersToRecycle == null) {
-            countersToRecycle = new InternalCounters(inactiveCounters);
-        }
-        // Verify that replacement counters can validly be used as an inactive counters replacement:
         validateFitAsReplacementCounters(countersToRecycle);
-        try {
-            recordingPhaser.readerLock();
-            inactiveCounters = (InternalCounters) countersToRecycle;
-            performIntervalSample();
-            return inactiveCounters;
-        } finally {
-            recordingPhaser.readerUnlock();
-        }
+        inactiveCounters = (InternalCounters) countersToRecycle;
+        performIntervalSample();
+        Counters sampledCounters = inactiveCounters;
+        inactiveCounters = null; // Once we expose the sample, we can't reuse it internally until it is recycled
+        return sampledCounters;
     }
 
     /**
@@ -164,6 +157,11 @@ public class SingleWriterCountersPublisher {
     private void performIntervalSample() {
         try {
             recordingPhaser.readerLock();
+
+            // Make sure we have an inactive version to flip in:
+            if (inactiveCounters == null) {
+                inactiveCounters = new InternalCounters(activeCounters);
+            }
 
             // Swap active and inactive counters:
             final InternalCounters tempCounters = inactiveCounters;
@@ -199,6 +197,9 @@ public class SingleWriterCountersPublisher {
 
     void validateFitAsReplacementCounters(Counters replacementCounters) {
         boolean bad = true;
+        if (replacementCounters == null) {
+            bad = false;
+        }
         if ((replacementCounters instanceof InternalCounters)
                 &&
                 (((InternalCounters) replacementCounters).containingInstanceId ==
