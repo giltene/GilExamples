@@ -10,17 +10,9 @@ import org.performancehints.SpinHint;
 
 public class SpinHintTest {
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
-    public static final long ITERATIONS = 100L * 1000L * 1000L;
+    public static final long ITERATIONS = 200L * 1000L * 1000L;
 
-    public static volatile long s1;
-
-    // Padding (2 cache lines worth):
-    public static volatile long p0, p1, p2, p3, p4, p5, p6, p7;
-    public static volatile long p8, p9, p10, p11, p12, p13, p14, p15;
-
-    public static volatile long s2;
-
-    public static volatile boolean doRun = true;
+    public static volatile long spinData; // even: ready to produce; odd: ready to consume; -3: terminate
 
     public static final Histogram latencyHistogram = new Histogram(3600L * 1000L * 1000L * 1000L, 2);
 
@@ -31,55 +23,56 @@ public class SpinHintTest {
         }
         public void run() {
             long prevTime = System.nanoTime();
-            long value = s1;
-            while (s1 < iterations) {
-                while (s2 != value) {
-                    // busy spin
+            for (long i = 0; i < iterations; i++) {
+                while ((spinData & 0x1) == 1) {
+                    // busy spin until ready to produce
                     SpinHint.spinLoopHint();
                 }
                 long currTime = System.nanoTime();
                 latencyHistogram.recordValue(currTime - prevTime);
                 prevTime = System.nanoTime();
-                value = ++s1;
+                spinData++; // produce
             }
+
+            // Signal consumer to terminate:
+            // First make sure we are ready to produce, to avoid racing
+            // with (and getting stomped by) consumer's ++ op:
+            while ((spinData & 0x1) == 1);
+            // Now, knowing that consumer is not concurrently modifying
+            // spinData, we can signal to terminate:
+            spinData = -3;
         }
     }
 
     static class Consumer extends Thread {
         public void run() {
-            long value = s2;
-            while (doRun) {
-                while (doRun && (value == s1)) {
-                    // busy spin
+            while (spinData >= 0) {
+                while ((spinData & 0x1) == 0) {
+                    // busy spin until ready to consume
                     SpinHint.spinLoopHint();
                 }
-                value = ++s2;
+                spinData++; // consume
             }
         }
     }
 
     public static void main(final String[] args) {
         try {
+            spinData = 0;
             Thread consumer = new Consumer();
             consumer.setDaemon(true);
             consumer.start();
 
-            s1 = s2 = 0;
-            doRun = true;
-
-
             Thread producer = new Producer(WARMUP_ITERATIONS);
             producer.start();
             producer.join();
-            doRun = false;
             consumer.join();
             latencyHistogram.reset();
 
-            Thread.sleep(500);
-            System.out.println("Warmup done. Restarting threads.");
+            Thread.sleep(1000); // Let things (like JIT compilations) settle down.
+            System.out.println("# Warmup done. Restarting threads.");
 
-            s1 = s2 = 0;
-            doRun = true;
+            spinData = 0;
             consumer = new Consumer();
             consumer.setDaemon(true);
             consumer.start();
@@ -89,21 +82,21 @@ public class SpinHintTest {
             long start = System.nanoTime();
             producer.start();
             producer.join();
+            consumer.join();
 
             long duration = System.nanoTime() - start;
 
-            System.out.println("duration = " + duration);
-            System.out.println("ns per op = " + duration / (ITERATIONS));
-            System.out.println("op/sec = " +
-                    (ITERATIONS * 1000L * 1000L * 1000L) / duration);
-            System.out.println("s1 = " + s1 + ", s2 = " + s2);
-            System.out.println("\nRound trip latency histogram:\n");
+            System.out.println("# Round trip latency histogram:");
             latencyHistogram.outputPercentileDistribution(System.out, 5, 1.0);
+            System.out.println("# duration = " + duration);
+            System.out.println("# duration (ns) per op = " + duration / (ITERATIONS));
+            System.out.println("# op/sec = " +
+                    (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 
-            System.out.println("50%'ile:   " + latencyHistogram.getValueAtPercentile(50.0) + "ns");
-            System.out.println("90%'ile:   " + latencyHistogram.getValueAtPercentile(90.0) + "ns");
-            System.out.println("99%'ile:   " + latencyHistogram.getValueAtPercentile(99.0) + "ns");
-            System.out.println("99.9%'ile: " + latencyHistogram.getValueAtPercentile(99.9) + "ns");
+            System.out.println("# 50%'ile:   " + latencyHistogram.getValueAtPercentile(50.0) + "ns");
+            System.out.println("# 90%'ile:   " + latencyHistogram.getValueAtPercentile(90.0) + "ns");
+            System.out.println("# 99%'ile:   " + latencyHistogram.getValueAtPercentile(99.0) + "ns");
+            System.out.println("# 99.9%'ile: " + latencyHistogram.getValueAtPercentile(99.9) + "ns");
         } catch (InterruptedException ex) {
             System.err.println("SpinHintTest interrupted.");
         }
