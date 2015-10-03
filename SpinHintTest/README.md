@@ -20,7 +20,7 @@ command can be used:
 (the choice of cores 23 and 47 is specific to a 48 vcore system where cores
  23 and 47 represent two hyper-threads on a common core).
  
-##Example results (two threads on a shared core on a Xeon E5-2697v2): 
+###Example results (two threads on a shared core on a Xeon E5-2697v2): 
 ![example results] 
  
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
