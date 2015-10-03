@@ -58,11 +58,16 @@ which can then be directly plotted using tools like [HdrHistogram's online perce
 ###Prototype intrinsifying implementations
 
 A prototype OpenJDK implementation that implements org.performancehintsSpinHint.spinLoopHint() as a PAUSE instruction
-on x86-64 is available. Webrevs can be found here: [http://ivankrylov.github.io/spinloophint/webrev/], and a
-downloadable working OpenJDK9-based JDK (which accepts an optional -XX:+UseSpinLoopHintIntrinsic flag to turn the
+on x86-64 is available. Relevant Webrevs can be found here: [http://ivankrylov.github.io/spinloophint/webrev/],
+here: [http://ivankrylov.github.io/spinloophint/webrev.jdk/], and here: [http://ivankrylov.github.io/spinloophint/webrev.main/].  
+A downloadable working OpenJDK9-based JDK (which accepts an optional -XX:+UseSpinLoopHintIntrinsic flag to turn the
 feature on) can be found here:   
 - Linux: [https://www.dropbox.com/s/r2w1s1jykr2qs01/slh-openjdk-9-b70-bin-linux-x64.tar.gz?dl=0]  
 - Mac: [https://www.dropbox.com/s/h11zcyjhyq2q358/slh-openjdk-9-b70-bin-mac-x64.tar.gz?dl=0]  
 - Windows: [https://www.dropbox.com/s/j6p1y4sixc84xzu/slh-openjdk-9-b70-bin-win64-x64.tar.gz?dl=0]  
 
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
+
+
+[5] JDK WebRevs for prototype intrinsifying implementation: http://ivankrylov.github.io/spinloophint/webrev.jdk/
+[6] Build environment WebRevs for prototype intrinsifying implementation: http://ivankrylov.github.io/spinloophint/webrev.main/
