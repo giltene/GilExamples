@@ -10,6 +10,19 @@ import org.performancehints.SpinHint;
 
 import java.util.Locale;
 
+/**
+ * And alternating variant of SpinLoopTest: Each thread alternates between spinning with a spinLoopHint()
+ * call in the loop and spinning without a hint. Comparing the behavior with alternating hinting loops to
+ * the behavior with hints in all loops (or no hints at all) may provide some insight about the cause of
+ * the latency benefits derived on a given platform (assuming such benefits have been shown with SpinLoopHint).
+ *
+ * E.g. if the latency behavior with alternating hints does not differ dramatically from the behavior with
+ * hints always on, it could be postulated that the benefit derives from increased core frequency (and that a
+ * 1 in 2 loops hinting is enough to produce the same power savings to allow the same higher core frequency).
+ * On the other hand, if the behavior with alternating hint loops does differ significantly from non-alternating
+ * ones, the benfit might be caused by something else (like some sort of reduction in the amount of speculative
+ * state that needs to be unrrolled when existing the loop).
+ */
 public class AlternatingSpinHintTest {
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
     public static final long ITERATIONS = 100L * 1000L * 1000L;
