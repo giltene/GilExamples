@@ -58,8 +58,10 @@ which can then be directly plotted using tools like [HdrHistogram's online perce
 ###Prototype intrinsifying implementations
 
 A prototype OpenJDK implementation that implements org.performancehintsSpinHint.spinLoopHint() as a PAUSE instruction
-on x86-64 is available. Relevant Webrevs can be found here: [http://ivankrylov.github.io/spinloophint/webrev/],
-here: [http://ivankrylov.github.io/spinloophint/webrev.jdk/], and here: [http://ivankrylov.github.io/spinloophint/webrev.main/].  
+on x86-64 is available. Relevant Webrevs can be found here:  
+- HotSpot: [http://ivankrylov.github.io/spinloophint/webrev/]  
+- JDK: [http://ivankrylov.github.io/spinloophint/webrev.jdk/]  
+- Build environment: [http://ivankrylov.github.io/spinloophint/webrev.main/]      
 A downloadable working OpenJDK9-based JDK (which accepts an optional -XX:+UseSpinLoopHintIntrinsic flag to turn the
 feature on) can be found here:   
 - Linux: [https://www.dropbox.com/s/r2w1s1jykr2qs01/slh-openjdk-9-b70-bin-linux-x64.tar.gz?dl=0]  
