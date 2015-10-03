@@ -10,34 +10,28 @@ import org.performancehints.SpinHint;
 
 /**
  * A simple thread-to-thread communication latency test that measures and reports on the
- * behavior of thread-to-thread ping-pong latencies when spinning using a shared volatile
- * field, along with the impact of using a spinLoo[Hint() call on that latency behavior.
+ * throughout of thread-to-thread ping-pong communications when spinning using a shared
+ * volatile field, along with the impact of using a spinLoo[Hint() on that ping pong throughput.
  *
- * This test can be used to measure and document the impact of spinLoopHint behavior
- * on thread-to-thread communication latencies. E.g. when the two threads are pinned to
- * the two hardware threads of a shared x86 core (with a shared L1), this test will
- * demonstrate an estimate the best case thread-to-thread latencies possible on the
- * platform, if the latency of measuring time with System.nanoTime() is discounted
- * (nanoTime latency can be separtely estimated across the percentile spectrum using
- * the {@link NanoTimeLatency} test in this package).
+ * By observing the effects of spinLoopHint behavior on ping pong throughout, this test can be
+ * used to indirectly measure and document the impact of spinLoopHint behavior on thread-to-thread
+ * communication latencies.
  *
  * For consistent measurement, it is recommended that this test be executed while
  * binding the process to specific cores. E.g. on a Linux system, the following
  * command can be used:
  *
- * taskset -c 23,47 java -jar SpinLoopHint.jar
+ * taskset -c 23,47 java -cp SpinHintTest.jar SpinHintThroughputTest
  *
  * (the choice of cores 23 and 47 is specific to a 48 vcore system where cores
  * 23 and 47 represent two hyper-threads on a common core).
  *
  */
-public class SpinHintTest {
+public class SpinHintThroughputTest {
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
     public static final long ITERATIONS = 200L * 1000L * 1000L;
 
     public static volatile long spinData; // even: ready to produce; odd: ready to consume; -3: terminate
-
-    public static final Histogram latencyHistogram = new Histogram(3600L * 1000L * 1000L * 1000L, 2);
 
     static class Producer extends Thread {
         final long iterations;
@@ -45,15 +39,11 @@ public class SpinHintTest {
             this.iterations = terminatingIterationCount;
         }
         public void run() {
-            long prevTime = System.nanoTime();
             for (long i = 0; i < iterations; i++) {
                 while ((spinData & 0x1) == 1) {
                     // busy spin until ready to produce
                     SpinHint.spinLoopHint();
                 }
-                long currTime = System.nanoTime();
-                latencyHistogram.recordValue(currTime - prevTime);
-                prevTime = System.nanoTime();
                 spinData++; // produce
             }
 
@@ -90,7 +80,6 @@ public class SpinHintTest {
             producer.start();
             producer.join();
             consumer.join();
-            latencyHistogram.reset();
 
             Thread.sleep(1000); // Let things (like JIT compilations) settle down.
             System.out.println("# Warmup done. Restarting threads.");
@@ -110,16 +99,11 @@ public class SpinHintTest {
             long duration = System.nanoTime() - start;
 
             System.out.println("# Round trip latency histogram:");
-            latencyHistogram.outputPercentileDistribution(System.out, 5, 1.0);
             System.out.println("# duration = " + duration);
             System.out.println("# duration (ns) per op = " + duration / (ITERATIONS));
             System.out.println("# op/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 
-            System.out.println("# 50%'ile:   " + latencyHistogram.getValueAtPercentile(50.0) + "ns");
-            System.out.println("# 90%'ile:   " + latencyHistogram.getValueAtPercentile(90.0) + "ns");
-            System.out.println("# 99%'ile:   " + latencyHistogram.getValueAtPercentile(99.0) + "ns");
-            System.out.println("# 99.9%'ile: " + latencyHistogram.getValueAtPercentile(99.9) + "ns");
         } catch (InterruptedException ex) {
             System.err.println("SpinHintTest interrupted.");
         }

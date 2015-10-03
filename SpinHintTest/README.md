@@ -42,7 +42,7 @@ For consistent measurement, it is recommended that this test be executed while
 binding the process to specific cores. E.g. on a Linux system, the following
 command can be used:
 
-    % taskset -c 23, 47 ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -jar SpinLoopHint.jar
+    % taskset -c 23,47 ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -jar SpinLoopHint.jar
     
 To place the spinning threads on the same core. (the choice of cores 23 and 47 is specific
 to a 48 vcore system where cores 23 and 47 represent two hyper-threads on a common core. You will want
@@ -70,3 +70,23 @@ feature on) can be found here:
 - Windows: [https://www.dropbox.com/s/j6p1y4sixc84xzu/slh-openjdk-9-b70-bin-win64-x64.tar.gz?dl=0]  
 
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
+
+#### Additional tests
+
+This package includes some additional tests that can be used to explore the impact of spinLoopHint()
+beahvior: 
+
+To test pure ping pong throughput test with no latency measurement overhead:
+
+    % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar SpinHintThroughput
+
+To test the behvaior of thread ping-pong latencies when loops alternate between using spinLoopHint()
+(for the duration of the loop) and not using it (for the duration of the next loop):
+
+    % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar AlternatingSpinHintTest
+    
+To document the latency of measure time with System.nanoTime() (so that it can be discounted when
+observing ping pong latecies in the latency measuring tests):
+
+    % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar NanoTimeLatency
+    
