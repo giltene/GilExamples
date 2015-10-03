@@ -20,7 +20,13 @@ command can be used:
 (the choice of cores 23 and 47 is specific to a 48 vcore system where cores
  23 and 47 represent two hyper-threads on a common core).
  
-###Example results (two threads on a shared core on a Xeon E5-2697v2): 
+###Plotting results:
+ 
+SpinLoopHint outputs a percentile histogram distribution in [HdrHistogram](http://hdrhistogram.org)'s common
+.hgrm format. This output can/shuld be redirected to an .hgrm file (e.g. vanilla.hgrm),
+which can then be directly plotted using tools like [HdrHistogram's online percentile plotter] (http://hdrhistogram.github.io/HdrHistogram/plotFiles.html)
+ 
+###Example results plot (two threads on a shared core on a Xeon E5-2697v2): 
 ![example results] 
  
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
