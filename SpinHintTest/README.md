@@ -18,7 +18,11 @@ the NanoTimeLatency test in this package).
 ###Running:
 
 This test is obviously intended to be run on machines with 2 or more vcores (tests on single vcore machines will
-produce understandably outrageously long runtimes). 
+produce understandably outrageously long runtimes).
+ 
+(If needed) Prepare the SpinLoopHint.jar by running:
+ 
+    % mvn clean install
 
 The simplest way to run this test is:
 
