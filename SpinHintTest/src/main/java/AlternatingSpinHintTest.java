@@ -24,6 +24,7 @@ import java.util.Locale;
  * state that needs to be unrrolled when existing the loop).
  */
 public class AlternatingSpinHintTest {
+    public static final long WARMUP_PASS_COUNT = 5;
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
     public static final long ITERATIONS = 100L * 1000L * 1000L;
 
@@ -87,17 +88,24 @@ public class AlternatingSpinHintTest {
 
     public static void main(final String[] args) {
         try {
-            spinData = 0;
-            Thread consumer = new Consumer();
-            consumer.setDaemon(true);
-            consumer.start();
 
-            Thread producer = new Producer(WARMUP_ITERATIONS);
-            producer.start();
-            producer.join();
-            consumer.join();
-            noHintLatencyHistogram.reset();
-            withHintLatencyHistogram.reset();
+            Thread producer;
+            Thread consumer;
+
+            for (int i = 0; i < WARMUP_PASS_COUNT; i++) {
+                spinData = 0;
+                consumer = new Consumer();
+                consumer.setDaemon(true);
+                consumer.start();
+
+                producer = new Producer(WARMUP_ITERATIONS);
+                producer.start();
+                producer.join();
+                consumer.join();
+
+                noHintLatencyHistogram.reset();
+                withHintLatencyHistogram.reset();
+            }
 
             Thread.sleep(1000); // Let things (like JIT compilations) settle down.
             System.out.println("# Warmup done. Restarting threads.");
@@ -123,8 +131,8 @@ public class AlternatingSpinHintTest {
             withHintLatencyHistogram.outputPercentileDistribution(System.out, 5, 1.0);
 
             System.out.println("# duration = " + duration);
-            System.out.println("# duration (ns) per op = " + duration / (ITERATIONS));
-            System.out.println("# op/sec = " +
+            System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS));
+            System.out.println("# round trip ops/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 
             System.out.format(Locale.US, "# Percentile  No Hint      With Hint\n");

@@ -32,6 +32,7 @@ import org.performancehints.SpinHint;
  *
  */
 public class SpinHintTest {
+    public static final long WARMUP_PASS_COUNT = 5;
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
     public static final long ITERATIONS = 200L * 1000L * 1000L;
 
@@ -81,16 +82,22 @@ public class SpinHintTest {
 
     public static void main(final String[] args) {
         try {
-            spinData = 0;
-            Thread consumer = new Consumer();
-            consumer.setDaemon(true);
-            consumer.start();
+            Thread producer;
+            Thread consumer;
 
-            Thread producer = new Producer(WARMUP_ITERATIONS);
-            producer.start();
-            producer.join();
-            consumer.join();
-            latencyHistogram.reset();
+            for (int i = 0; i < WARMUP_PASS_COUNT; i++) {
+                spinData = 0;
+                consumer = new Consumer();
+                consumer.setDaemon(true);
+                consumer.start();
+
+                producer = new Producer(WARMUP_ITERATIONS);
+                producer.start();
+                producer.join();
+                consumer.join();
+
+                latencyHistogram.reset();
+            }
 
             Thread.sleep(1000); // Let things (like JIT compilations) settle down.
             System.out.println("# Warmup done. Restarting threads.");
@@ -112,8 +119,8 @@ public class SpinHintTest {
             System.out.println("# Round trip latency histogram:");
             latencyHistogram.outputPercentileDistribution(System.out, 5, 1.0);
             System.out.println("# duration = " + duration);
-            System.out.println("# duration (ns) per op = " + duration / (ITERATIONS));
-            System.out.println("# op/sec = " +
+            System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS));
+            System.out.println("# round trip ops/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 
             System.out.println("# 50%'ile:   " + latencyHistogram.getValueAtPercentile(50.0) + "ns");

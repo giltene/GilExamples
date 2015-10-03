@@ -28,6 +28,7 @@ import org.performancehints.SpinHint;
  *
  */
 public class SpinHintThroughputTest {
+    public static final long WARMUP_PASS_COUNT = 5;
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
     public static final long ITERATIONS = 200L * 1000L * 1000L;
 
@@ -71,15 +72,20 @@ public class SpinHintThroughputTest {
 
     public static void main(final String[] args) {
         try {
-            spinData = 0;
-            Thread consumer = new Consumer();
-            consumer.setDaemon(true);
-            consumer.start();
+            Thread producer;
+            Thread consumer;
 
-            Thread producer = new Producer(WARMUP_ITERATIONS);
-            producer.start();
-            producer.join();
-            consumer.join();
+            for (int i = 0; i < WARMUP_PASS_COUNT; i++) {
+                spinData = 0;
+                consumer = new Consumer();
+                consumer.setDaemon(true);
+                consumer.start();
+
+                producer = new Producer(WARMUP_ITERATIONS);
+                producer.start();
+                producer.join();
+                consumer.join();
+            }
 
             Thread.sleep(1000); // Let things (like JIT compilations) settle down.
             System.out.println("# Warmup done. Restarting threads.");
@@ -98,10 +104,9 @@ public class SpinHintThroughputTest {
 
             long duration = System.nanoTime() - start;
 
-            System.out.println("# Round trip latency histogram:");
             System.out.println("# duration = " + duration);
-            System.out.println("# duration (ns) per op = " + duration / (ITERATIONS));
-            System.out.println("# op/sec = " +
+            System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS));
+            System.out.println("# round trip ops/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 
         } catch (InterruptedException ex) {
