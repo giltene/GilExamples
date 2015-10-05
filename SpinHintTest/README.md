@@ -69,7 +69,7 @@ on x86-64 is available. Relevant Webrevs can be found here:
       
 A downloadable working OpenJDK9-based JDK (which accepts an optional -XX:+UseSpinLoopHintIntrinsic flag to turn the
 feature on) can be found here:   
-- Linux: [https://www.dropbox.com/s/r2w1s1jykr2qs01/slh-openjdk-9-b70-bin-linux-x64.tar.gz?dl=0]  
+- Linux: [https://www.dropbox.com/l/s/K4MgrJ0UD2VfddOwmkvflp]  
 - Mac: [https://www.dropbox.com/s/h11zcyjhyq2q358/slh-openjdk-9-b70-bin-mac-x64.tar.gz?dl=0]  
 - Windows: [https://www.dropbox.com/s/j6p1y4sixc84xzu/slh-openjdk-9-b70-bin-win64-x64.tar.gz?dl=0]  
 
