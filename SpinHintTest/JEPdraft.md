@@ -120,7 +120,7 @@ implementation will involve modifications to multiple JVM components and as such
 they carry some risks, but no more than other simple intrinsics added to the JDK.
 
 
-[1] The LMAX Disruptor [https://lmax-exchange.github.io/disruptor/]
+[1] The LMAX Disruptor [https://lmax-exchange.github.io/disruptor/]  
 [2] [https://github.com/giltene/GilExamples/tree/master/SpinHintTest]    
 [3] Chart depicting SpinLoopHint intrinsification impact [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png]    
 [4] HotSpot WebRevs for prototype implementation which intrinsifies org.performancehintsSpinHint.spinLoopHint() [http://ivankrylov.github.io/spinloophint/webrev/]    
