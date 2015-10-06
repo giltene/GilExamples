@@ -1,15 +1,18 @@
 #JEP XYZ: Spin Loop Hint
 
 (suggested content for some JEP fields):
-Authors	Gil Tene
-Owner	Gil Tene
-Type	Feature
-Status	Draft
-Component	core-libs
-Scope	JDK
-Discussion	core dash libs dash dev at openjdk dot java dot net
-Effort	S
-Duration	S
+
+| -------------:| ------------- |
+| Authors       | Gil Tene      |  
+| Owner         | Gil Tene      |
+| Type	        | Feature       | 
+| Status        | Draft         |
+| Component     | core-libs     |
+| Scope         | JDK           |
+| Discussion    | core dash libs dash dev at openjdk dot java dot net | 
+| Effort        | S             |
+| Duration	    | S             |
+
 
 ##Summary
 
