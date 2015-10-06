@@ -3,7 +3,7 @@
 (suggested content for some JEP fields):
 
 | field         | suggested contents |
-| -------------:| ------------- |
+| ------------- | ------------- |
 | Authors       | Gil Tene      |  
 | Owner         | Gil Tene      |
 | Type	        | Feature       | 
