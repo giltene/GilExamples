@@ -1,3 +1,5 @@
+(See draft spinLoopHint() JEP here: [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/JEPdraft.md])
+
 #SpinHintTest
 
 A simple thread-to-thread communication latency test that measures and reports on the
@@ -73,8 +75,6 @@ feature on) can be found here:
 - Mac: [https://www.dropbox.com/s/h11zcyjhyq2q358/slh-openjdk-9-b70-bin-mac-x64.tar.gz?dl=0]  
 - Windows: [https://www.dropbox.com/s/j6p1y4sixc84xzu/slh-openjdk-9-b70-bin-win64-x64.tar.gz?dl=0]  
 
-[example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
-
 #### Additional tests
 
 This package includes some additional tests that can be used to explore the impact of spinLoopHint()
@@ -94,3 +94,4 @@ observing ping pong latecies in the latency measuring tests):
 
     % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar NanoTimeLatency
     
+[example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
