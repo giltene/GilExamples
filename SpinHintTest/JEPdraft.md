@@ -1,4 +1,4 @@
-#JEP XYZ: Spin Wait performance enhancement
+#JEP XYZ: Spin Wait hinting
 
 (suggested content for some JEP fields):
 
@@ -21,8 +21,8 @@ Add an API that would allow Java code to indicate that a spin wait loop is being
 
 ##Goals
 
-Provide an API that would allow Java code to hint to the runtime that it is in a spin wait
-loop. The API would be a pure hint, and will carry no semantic behavior requirements (i.e.
+Provide an API that would allow Java code to indicate to the runtime that it is in a spin wait
+loop. The API would act as a pure hint, and will carry no semantic behavior requirements (i.e.
 a no-op is a valid implementation). Allow the JVM to benefit from spin wait loop specific
 behaviors that may be useful on certain hardware platforms. Provide both a no-op implementation
 and an intrinsic implementation in the JDK, and demonstrate an execution benefit on at least one
@@ -38,8 +38,8 @@ such as prefetch hints, are outside the scope of this JEP.
 Some hardware platforms benefit from software indication that a spin wait loop is in progress.
 Some common execution benefits may be observed:
 
-A) The reaction time of a spin wait loop construct may be improved when a spin hint is used due
-to various factors, reducing thread-to-thread latencies in spinning wait situations.
+A) The reaction time of a spin wait loop construct may be improved when a spin wait hinting
+is used due to various factors, reducing thread-to-thread latencies in spinning wait situations.
 
 and
 
@@ -58,7 +58,7 @@ can be used to indicate spinning behavior. Using a PAUSE instruction demonstrabl
 thread-to-thread round trips. Due to it's benefits and commonly recommended use, the x86 PAUSE
 instruction is commonly used in kernel spinlocks, in POSIX libraries that perform heuristic
 spins prior to blocking, and even by the JVM itself. However, due to the inability to hint
-that a Java loop is spinning, it's benefits are not available to regular Java code.
+or indicate that a Java loop is spinning, it's benefits are not available to regular Java code.
 
 We include specific supporting evidence: In simple tests [2] performed on a E5-2697 v2,
 measuring the round trip latency behavior between two threads that communicate by spinning
@@ -76,13 +76,13 @@ measure time.
 
 ##Description
 
-We propose to add a method to the JDK which would be hint that a spin loop is being
-performed. Runtime.onSpinWait(), which in intended to become a Java SE API. The
-specific name space location, class name, and method name will be determined as part
-of development of this JEP.
+We propose to add a method to the JDK which would indicate to the runtime that a
+spin loop is being performed: e.g. Runtime.onSpinWait(). We intended this method
+to become a Java SE API. The specific name space location, class name, and method
+name will be determined as part of development of this JEP.
 
-An empty method would be a valid implementation of the onSpinWait() method, but
-intrisic implementation is the obvious goal for hardware platforms that can benefit
+An empty method would be a valid implementation of the Runtime.onSpinWait() method,
+but intrisic implementation is the obvious goal for hardware platforms that can benefit
 from it. We intend to produce an intrinsic x86 implementation for OpenJDK as part
 of developing this JEP. A prototype implementation already exists [4] [5] [6] [7] and
 results from initial testing show promise.
@@ -107,7 +107,7 @@ Testing of a "vanilla" no-op implementation will obviously be fairly simple.
 We believe that given the vey small footprint of this API, testing of an
 intrinsified x86 implementation in OpenJDK will also be straightforward. We expect
 testing to focus on confirming both the code generation correctness and latency
-benefits of using the spin loop hint with an intrinsic implementation.
+benefits of using an intrinsic implementation of Runtime.onSpinWait().
 
 Should this API be proposed as a Java SE API (e.g. for inclusion in the
 java.* namespace in a future Java SE 9 or Java SE 10), we expect to develop an
