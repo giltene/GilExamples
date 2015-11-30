@@ -84,7 +84,7 @@ name will be determined as part of development of this JEP.
 An empty method would be a valid implementation of the Runtime.onSpinWait() method,
 but intrisic implementation is the obvious goal for hardware platforms that can benefit
 from it. We intend to produce an intrinsic x86 implementation for OpenJDK as part
-of developing this JEP. A prototype implementation already exists [4] [5] [6] [7] and
+of developing this JEP. A prototype implementation already exists [4] [5] [6] and
 results from initial testing show promise.
 
 ##Alternatives
@@ -119,13 +119,11 @@ The "vanilla" no-op implementation is obviously fairly low risk. An intrinsic x8
 implementation will involve modifications to multiple JVM components and as such
 they carry some risks, but no more than other simple intrinsics added to the JDK.
 
-
 [1] The LMAX Disruptor [https://lmax-exchange.github.io/disruptor/]  
 [2] [https://github.com/giltene/GilExamples/tree/master/SpinHintTest]    
 [3] Chart depicting onSpinWait() intrinsification impact [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png]    
-[4] HotSpot WebRevs for prototype implementation which intrinsifies org.performancehints.Runtime.onSpinWait() [http://ivankrylov.github.io/onspinwait/webrev/]    
-[5] JDK WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/onspinwait/webrev.jdk/]    
-[6] Build environment WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/onspinwait/webrev.main/]    
-[7] Link to a working Linux protoype OpenJDK9-based JDK (accepts optional -XX:+UseSpinLoopHintIntrinsic) [https://www.dropbox.com/s/r2w1s1jykr2qs01/slh-openjdk-9-b70-bin-linux-x64.tar.gz?dl=0]    
+[4] HotSpot WebRevs for prototype implementation which intrinsifies org.performancehints.Runtime.onSpinWait() [http://ivankrylov.github.io/onspinwait/jdk9b94.hs.webrev/]    
+[5] JDK WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/onspinwait/jdk9b94.jdk.webrev/]    
+[6] Link to a working Linux protoype OpenJDK9-based JDK (accepts optional -XX:++UseOnSpinWaitIntrinsic) [https://www.dropbox.com/s/r2w1s1jykr2qs01/slh-openjdk-9-b70-bin-linux-x64.tar.gz?dl=0]    
 
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
