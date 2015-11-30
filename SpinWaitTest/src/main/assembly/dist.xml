@@ -20,7 +20,7 @@
             <directory>${project.build.directory}</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>SpinHintTest.jar</include>
+                <include>SpinWaitTest.jar</include>
             </includes>
         </fileSet>
         <fileSet>

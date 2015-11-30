@@ -1,6 +1,6 @@
-(See draft Runtime.onSpinWait() JEP here: [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/JEPdraft.md])
+(See draft Runtime.onSpinWait() JEP here: [https://github.com/giltene/GilExamples/blob/master/SpinWaitTest/JEPdraft.md])
 
-#SpinHintTest
+#SpinWaitTest
 
 A simple thread-to-thread communication latency test that measures and reports on the
 behavior of thread-to-thread ping-pong latencies when spinning using a shared volatile
@@ -22,23 +22,23 @@ the NanoTimeLatency test in this package).
 This test is obviously intended to be run on machines with 2 or more vcores (tests on single vcore machines will
 produce understandably outrageously long runtimes).
  
-(If needed) Prepare the SpinHintTest.jar by running:
+(If needed) Prepare the SpinWaitTest.jar by running:
  
     % mvn clean install
 
 The simplest way to run this test is:
 
-    % ${JAVA_HOME}/bin/java -jar SpinHintTest.jar
+    % ${JAVA_HOME}/bin/java -jar SpinWaitTest.jar
 
 Since the test is intended to highlight the benefits of an intrinsic Runtime.onSpinWait(), using a prototype JDK
 that that intrinsifies org.performancehints.Runtime.onSpinWait() as a PAUSE instruction
 (see links below), is obviously recommended. Using such a JDK, you can compare the output of:
 
-    % ${JAVA_HOME}/bin/java -XX:-UseOnSpinWaitIntrinsic -jar SpinHintTest.jar > intrinsicSpinHint.hgrm
+    % ${JAVA_HOME}/bin/java -XX:-UseOnSpinWaitIntrinsic -jar SpinWaitTest.jar > intrinsicSpinHint.hgrm
 
 and 
     
-    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -jar SpinHintTest.jar > vanilla.hgrm
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -jar SpinWaitTest.jar > vanilla.hgrm
 
 By plotting them both with [HdrHistogram's online percentile plotter] (http://hdrhistogram.github.io/HdrHistogram/plotFiles.html)
 
@@ -48,7 +48,7 @@ For consistent measurement, it is recommended that this test be executed while
 binding the process to specific cores. E.g. on a Linux system, the following
 command can be used:
 
-    % taskset -c 23,47 ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -jar SpinHintTest.jar
+    % taskset -c 23,47 ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -jar SpinWaitTest.jar
     
 To place the spinning threads on the same core. (the choice of cores 23 and 47 is specific
 to a 48 vcore system where cores 23 and 47 represent two hyper-threads on a common core. You will want
@@ -81,16 +81,16 @@ beahvior:
 
 To test pure ping pong throughput test with no latency measurement overhead:
 
-    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinHintTest.jar SpinHintThroughput
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinWaitTest.jar SpinHintThroughput
 
-To test the behvaior of thread ping-pong latencies when loops alternate between using Runtime.onSpinWait()
+To test the behavior of thread ping-pong latencies when loops alternate between using Runtime.onSpinWait()
 (for the duration of the loop) and not using it (for the duration of the next loop):
 
-    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinHintTest.jar AlternatingSpinHintTest
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinWaitTest.jar AlternatingOnSpinWaitTest
     
 To document the latency of measure time with System.nanoTime() (so that it can be discounted when
 observing ping pong latecies in the latency measuring tests):
 
-    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinHintTest.jar NanoTimeLatency
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinWaitTest.jar NanoTimeLatency
     
-[example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
+[example results]:https://raw.github.com/giltene/GilExamples/master/SpinWaitTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"

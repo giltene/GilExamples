@@ -5,50 +5,37 @@
  * @author Gil Tene
  */
 
-import org.performancehints.Runtime;
+import org.HdrHistogram.Histogram;
 
 /**
- * A simple thread-to-thread communication latency test that measures and reports on the
- * throughout of thread-to-thread ping-pong communications when spinning using a shared
- * volatile field, along with the impact of using a Runtime.onSpinWait() on that ping pong
- * throughput.
- *
- * By observing the effects of Runtime.onSpinWait() behavior on ping pong throughout, this test can be
- * used to indirectly measure and document the impact of Runtime.onSpinWait() behavior on thread-to-thread
- * communication latencies.
- *
- * For consistent measurement, it is recommended that this test be executed while
- * binding the process to specific cores. E.g. on a Linux system, the following
- * command can be used:
- *
- * taskset -c 23,47 java -cp SpinHintTest.jar SpinHintThroughputTest
- *
- * (the choice of cores 23 and 47 is specific to a 48 vcore system where cores
- * 23 and 47 represent two hyper-threads on a common core).
- *
+ * A variant with yield() instead of onSpinWait()...
+ * Try:
+ * taskset -c 23,47 java -cp SpinWaitTest.jar SpinYieldTest
  */
-public class SpinHintThroughputTest {
+public class SpinYieldTest {
     public static final long WARMUP_PASS_COUNT = 5;
-    public static final long WARMUP_ITERATIONS = 500L * 1000L;
-    public static final long ITERATIONS = 200L * 1000L * 1000L;
+    public static final long WARMUP_ITERATIONS = 50L * 1000L;
+    public static final long ITERATIONS = 20L * 1000L * 1000L;
 
     public static volatile long spinData; // even: ready to produce; odd: ready to consume; -3: terminate
-    public static volatile long totalSpins = 0;
+
+    public static final Histogram latencyHistogram = new Histogram(3600L * 1000L * 1000L * 1000L, 2);
 
     static class Producer extends Thread {
         final long iterations;
-
         Producer(final long terminatingIterationCount) {
             this.iterations = terminatingIterationCount;
         }
         public void run() {
-            long spins = 0;
+            long prevTime = System.nanoTime();
             for (long i = 0; i < iterations; i++) {
                 while ((spinData & 0x1) == 1) {
                     // busy spin until ready to produce
-                    Runtime.onSpinWait();
-                    spins++;
+                    Thread.yield();
                 }
+                long currTime = System.nanoTime();
+                latencyHistogram.recordValue(currTime - prevTime);
+                prevTime = System.nanoTime();
                 spinData++; // produce
             }
 
@@ -59,8 +46,6 @@ public class SpinHintThroughputTest {
             // Now, knowing that consumer is not concurrently modifying
             // spinData, we can signal to terminate:
             spinData = -3;
-
-            totalSpins += spins;
         }
     }
 
@@ -69,7 +54,7 @@ public class SpinHintThroughputTest {
             while (spinData >= 0) {
                 while ((spinData & 0x1) == 0) {
                     // busy spin until ready to consume
-                    Runtime.onSpinWait();
+                    Thread.yield();
                 }
                 spinData++; // consume
             }
@@ -91,6 +76,8 @@ public class SpinHintThroughputTest {
                 producer.start();
                 producer.join();
                 consumer.join();
+
+                latencyHistogram.reset();
             }
 
             Thread.sleep(1000); // Let things (like JIT compilations) settle down.
@@ -110,16 +97,19 @@ public class SpinHintThroughputTest {
 
             long duration = System.nanoTime() - start;
 
-            System.out.println("# of iterations in producer = " + ITERATIONS);
-            System.out.println("# of total spins in producer = " + totalSpins);
-            System.out.println("# of producer spins per iteration = " + (1.0 * totalSpins)/ ITERATIONS);
+            System.out.println("# Round trip latency histogram:");
+            latencyHistogram.outputPercentileDistribution(System.out, 5, 1.0);
             System.out.println("# duration = " + duration);
             System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS * 1.0));
             System.out.println("# round trip ops/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 
+            System.out.println("# 50%'ile:   " + latencyHistogram.getValueAtPercentile(50.0) + "ns");
+            System.out.println("# 90%'ile:   " + latencyHistogram.getValueAtPercentile(90.0) + "ns");
+            System.out.println("# 99%'ile:   " + latencyHistogram.getValueAtPercentile(99.0) + "ns");
+            System.out.println("# 99.9%'ile: " + latencyHistogram.getValueAtPercentile(99.9) + "ns");
         } catch (InterruptedException ex) {
-            System.err.println("SpinHintTest interrupted.");
+            System.err.println("SpinYieldTest interrupted.");
         }
     }
 

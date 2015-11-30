@@ -11,7 +11,7 @@ import org.performancehints.Runtime;
 import java.util.Locale;
 
 /**
- * And alternating variant of SpinHintTest: Each thread alternates between spinning with a Runtime.onSpinWait()
+ * And alternating variant of SpinWaitTest: Each thread alternates between spinning with a Runtime.onSpinWait()
  * call in the loop and spinning without a hint. Comparing the behavior with alternating hinting loops to
  * the behavior with hints in all loops (or no hints at all) may provide some insight about the cause of
  * the latency benefits derived on a given platform (assuming such benefits have been shown with
@@ -24,7 +24,7 @@ import java.util.Locale;
  * ones, the benfit might be caused by something else (like some sort of reduction in the amount of speculative
  * state that needs to be unrrolled when existing the loop).
  */
-public class AlternatingSpinHintTest {
+public class AlternatingOnSpinWaitTest {
     public static final long WARMUP_PASS_COUNT = 5;
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
     public static final long ITERATIONS = 100L * 1000L * 1000L;
@@ -151,7 +151,7 @@ public class AlternatingSpinHintTest {
                     withHintLatencyHistogram.getValueAtPercentile(99.9));
 
         } catch (InterruptedException ex) {
-            System.err.println("SpinHintTest interrupted.");
+            System.err.println("AlternatingOnSpinWaitTest interrupted.");
         }
     }
 

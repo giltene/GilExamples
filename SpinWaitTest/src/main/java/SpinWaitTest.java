@@ -25,13 +25,13 @@ import org.performancehints.Runtime;
  * binding the process to specific cores. E.g. on a Linux system, the following
  * command can be used:
  *
- * taskset -c 23,47 java -jar SpinHintTest.jar
+ * taskset -c 23,47 java -jar SpinWaitTest.jar
  *
  * (the choice of cores 23 and 47 is specific to a 48 vcore system where cores
  * 23 and 47 represent two hyper-threads on a common core).
  *
  */
-public class SpinHintTest {
+public class SpinWaitTest {
     public static final long WARMUP_PASS_COUNT = 5;
     public static final long WARMUP_ITERATIONS = 500L * 1000L;
     public static final long ITERATIONS = 200L * 1000L * 1000L;
@@ -128,7 +128,7 @@ public class SpinHintTest {
             System.out.println("# 99%'ile:   " + latencyHistogram.getValueAtPercentile(99.0) + "ns");
             System.out.println("# 99.9%'ile: " + latencyHistogram.getValueAtPercentile(99.9) + "ns");
         } catch (InterruptedException ex) {
-            System.err.println("SpinHintTest interrupted.");
+            System.err.println("SpinWaitTest interrupted.");
         }
     }
 

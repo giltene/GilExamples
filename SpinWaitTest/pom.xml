@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.giltene</groupId>
-    <artifactId>SpinHintTest</artifactId>
+    <artifactId>SpinWaitTest</artifactId>
     <version>1.0.1-SNAPSHOT</version>
 
-    <name>SpinHintTest</name>
+    <name>SpinWaitTest</name>
 
-    <url>https://github.com/giltene/GilExamples/SpinHintTest</url>
+    <url>https://github.com/giltene/GilExamples/SpinWaitTest</url>
 
     <packaging>jar</packaging>
 
@@ -73,7 +73,7 @@
                                     <artifactId>${project.artifactId}</artifactId>
                                     <version>${project.version}</version>
                                     <type>${project.packaging}</type>
-                                    <destFileName>SpinHintTest.jar</destFileName>
+                                    <destFileName>SpinWaitTest.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.basedir}</outputDirectory>
@@ -87,11 +87,11 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                    <finalName>SpinHintTest</finalName>
+                    <finalName>SpinWaitTest</finalName>
                     <archive>
                         <manifest>
                             <addClasspath>false</addClasspath>
-                            <mainClass>SpinHintTest</mainClass>
+                            <mainClass>SpinWaitTest</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
@@ -133,7 +133,7 @@
                             <rules>
                                 <rule>
                                     <pattern>org.HdrHistogram.**</pattern>
-                                    <result>spinhinttest.internal.hdrhistogram.@1</result>
+                                    <result>spinwaittest.internal.hdrhistogram.@1</result>
                                 </rule>
                             </rules>
                         </configuration>
