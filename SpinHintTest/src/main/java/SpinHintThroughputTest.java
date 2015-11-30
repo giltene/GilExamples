@@ -5,16 +5,16 @@
  * @author Gil Tene
  */
 
-import org.HdrHistogram.Histogram;
-import org.performancehints.SpinHint;
+import org.performancehints.Runtime;
 
 /**
  * A simple thread-to-thread communication latency test that measures and reports on the
  * throughout of thread-to-thread ping-pong communications when spinning using a shared
- * volatile field, along with the impact of using a spinLoo[Hint() on that ping pong throughput.
+ * volatile field, along with the impact of using a Runtime.onSpinWait() on that ping pong
+ * throughput.
  *
- * By observing the effects of spinLoopHint behavior on ping pong throughout, this test can be
- * used to indirectly measure and document the impact of spinLoopHint behavior on thread-to-thread
+ * By observing the effects of Runtime.onSpinWait() behavior on ping pong throughout, this test can be
+ * used to indirectly measure and document the impact of Runtime.onSpinWait() behavior on thread-to-thread
  * communication latencies.
  *
  * For consistent measurement, it is recommended that this test be executed while
@@ -33,17 +33,21 @@ public class SpinHintThroughputTest {
     public static final long ITERATIONS = 200L * 1000L * 1000L;
 
     public static volatile long spinData; // even: ready to produce; odd: ready to consume; -3: terminate
+    public static volatile long totalSpins = 0;
 
     static class Producer extends Thread {
         final long iterations;
+
         Producer(final long terminatingIterationCount) {
             this.iterations = terminatingIterationCount;
         }
         public void run() {
+            long spins = 0;
             for (long i = 0; i < iterations; i++) {
                 while ((spinData & 0x1) == 1) {
                     // busy spin until ready to produce
-                    SpinHint.spinLoopHint();
+                    Runtime.onSpinWait();
+                    spins++;
                 }
                 spinData++; // produce
             }
@@ -55,6 +59,8 @@ public class SpinHintThroughputTest {
             // Now, knowing that consumer is not concurrently modifying
             // spinData, we can signal to terminate:
             spinData = -3;
+
+            totalSpins += spins;
         }
     }
 
@@ -63,7 +69,7 @@ public class SpinHintThroughputTest {
             while (spinData >= 0) {
                 while ((spinData & 0x1) == 0) {
                     // busy spin until ready to consume
-                    SpinHint.spinLoopHint();
+                    Runtime.onSpinWait();
                 }
                 spinData++; // consume
             }
@@ -104,8 +110,11 @@ public class SpinHintThroughputTest {
 
             long duration = System.nanoTime() - start;
 
+            System.out.println("# of iterations in producer = " + ITERATIONS);
+            System.out.println("# of total spins in producer = " + totalSpins);
+            System.out.println("# of producer spins per iteration = " + (1.0 * totalSpins)/ ITERATIONS);
             System.out.println("# duration = " + duration);
-            System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS));
+            System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS * 1.0));
             System.out.println("# round trip ops/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 

@@ -35,7 +35,7 @@ public class NanoTimeLatency {
             long duration = System.nanoTime() - start;
 
             System.out.println("duration = " + duration);
-            System.out.println("ns per op = " + duration / (ITERATIONS));
+            System.out.println("ns per op = " + duration / (ITERATIONS * 1.0));
             System.out.println("op/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
             System.out.println("\nSystems.nanoTime() latency histogram:\n");

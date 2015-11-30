@@ -6,15 +6,16 @@
  */
 
 import org.HdrHistogram.Histogram;
-import org.performancehints.SpinHint;
+import org.performancehints.Runtime;
 
 import java.util.Locale;
 
 /**
- * And alternating variant of SpinLoopTest: Each thread alternates between spinning with a spinLoopHint()
+ * And alternating variant of SpinHintTest: Each thread alternates between spinning with a Runtime.onSpinWait()
  * call in the loop and spinning without a hint. Comparing the behavior with alternating hinting loops to
  * the behavior with hints in all loops (or no hints at all) may provide some insight about the cause of
- * the latency benefits derived on a given platform (assuming such benefits have been shown with SpinLoopHint).
+ * the latency benefits derived on a given platform (assuming such benefits have been shown with
+ * Runtime.onSpinWait()).
  *
  * E.g. if the latency behavior with alternating hints does not differ dramatically from the behavior with
  * hints always on, it could be postulated that the benefit derives from increased core frequency (and that a
@@ -47,7 +48,7 @@ public class AlternatingSpinHintTest {
 
                 while ((spinData & 0x1) == 1) {
                     // busy spin until ready to produce
-                    SpinHint.spinLoopHint();
+                    Runtime.onSpinWait();
                 }
                 long currTime = System.nanoTime();
                 withHintLatencyHistogram.recordValue(currTime - prevTime);
@@ -79,7 +80,7 @@ public class AlternatingSpinHintTest {
             while (spinData >= 0) {
                 while ((spinData & 0x1) == 0) {
                     // busy spin until ready to consume
-                    SpinHint.spinLoopHint();
+                    Runtime.onSpinWait();
                 }
                 spinData++; // consume
             }
@@ -131,7 +132,7 @@ public class AlternatingSpinHintTest {
             withHintLatencyHistogram.outputPercentileDistribution(System.out, 5, 1.0);
 
             System.out.println("# duration = " + duration);
-            System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS));
+            System.out.println("# duration (ns) per round trip op = " + duration / (ITERATIONS * 1.0));
             System.out.println("# round trip ops/sec = " +
                     (ITERATIONS * 1000L * 1000L * 1000L) / duration);
 

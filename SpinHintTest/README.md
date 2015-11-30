@@ -1,12 +1,12 @@
-(See draft spinLoopHint() JEP here: [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/JEPdraft.md])
+(See draft Runtime.onSpinWait() JEP here: [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/JEPdraft.md])
 
 #SpinHintTest
 
 A simple thread-to-thread communication latency test that measures and reports on the
 behavior of thread-to-thread ping-pong latencies when spinning using a shared volatile
-field, aling with the impact of using a spinLoo[Hint() call on that latency behavior.
+field, aling with the impact of using a Runtime.onSpinWait() call on that latency behavior.
 
-This test can be used to measure and document the impact of spinLoopHint behavior
+This test can be used to measure and document the impact of Runtime.onSpinWait() behavior
 on thread-to-thread communication latencies. E.g. when the two threads are pinned to
 the two hardware threads of a shared x86 core (with a shared L1), this test will
 demonstrate an estimate the best case thread-to-thread latencies possible on the
@@ -30,8 +30,8 @@ The simplest way to run this test is:
 
     % ${JAVA_HOME}/bin/java -jar SpinLoopHint.jar
 
-Since the test is intended to highlight the benefits of an intrinsic spinLoopHint(), using a prototype JDK
-that that intrinsifies org.performancehintsSpinHint.spinLoopHint() as a PAUSE instruction
+Since the test is intended to highlight the benefits of an intrinsic Runtime.onSpinWait(), using a prototype JDK
+that that intrinsifies org.performancehints.Runtime.onSpinWait() as a PAUSE instruction
 (see links below), is obviously recommended. Using such a JDK, you can compare the output of:
 
     % ${JAVA_HOME}/bin/java -XX:-UseSpinLoopHintIntrinsic -jar SpinLoopHint.jar > intrinsicSpinHint.hgrm
@@ -63,7 +63,7 @@ which can then be directly plotted using tools like [HdrHistogram's online perce
  
 ###Prototype intrinsifying implementations
 
-A prototype OpenJDK implementation that implements org.performancehintsSpinHint.spinLoopHint() as a PAUSE instruction
+A prototype OpenJDK implementation that implements org.performancehints.Runtime.onSpinWait() as a PAUSE instruction
 on x86-64 is available. Relevant Webrevs can be found here:  
 - HotSpot: [http://ivankrylov.github.io/spinloophint/webrev/]  
 - JDK: [http://ivankrylov.github.io/spinloophint/webrev.jdk/]  
@@ -77,14 +77,14 @@ feature on) can be found here:
 
 #### Additional tests
 
-This package includes some additional tests that can be used to explore the impact of spinLoopHint()
+This package includes some additional tests that can be used to explore the impact of Runtime.onSpinWait()
 beahvior: 
 
 To test pure ping pong throughput test with no latency measurement overhead:
 
     % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar SpinHintThroughput
 
-To test the behvaior of thread ping-pong latencies when loops alternate between using spinLoopHint()
+To test the behvaior of thread ping-pong latencies when loops alternate between using Runtime.onSpinWait()
 (for the duration of the loop) and not using it (for the duration of the next loop):
 
     % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar AlternatingSpinHintTest
