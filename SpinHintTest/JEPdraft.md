@@ -123,9 +123,9 @@ they carry some risks, but no more than other simple intrinsics added to the JDK
 [1] The LMAX Disruptor [https://lmax-exchange.github.io/disruptor/]  
 [2] [https://github.com/giltene/GilExamples/tree/master/SpinHintTest]    
 [3] Chart depicting onSpinWait() intrinsification impact [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png]    
-[4] HotSpot WebRevs for prototype implementation which intrinsifies org.performancehints.Runtime.onSpinWait() [http://ivankrylov.github.io/spinloophint/webrev/]    
-[5] JDK WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/spinloophint/webrev.jdk/]    
-[6] Build environment WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/spinloophint/webrev.main/]    
+[4] HotSpot WebRevs for prototype implementation which intrinsifies org.performancehints.Runtime.onSpinWait() [http://ivankrylov.github.io/onspinwait/webrev/]    
+[5] JDK WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/onspinwait/webrev.jdk/]    
+[6] Build environment WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/onspinwait/webrev.main/]    
 [7] Link to a working Linux protoype OpenJDK9-based JDK (accepts optional -XX:+UseSpinLoopHintIntrinsic) [https://www.dropbox.com/s/r2w1s1jykr2qs01/slh-openjdk-9-b70-bin-linux-x64.tar.gz?dl=0]    
 
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"

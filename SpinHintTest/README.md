@@ -22,23 +22,23 @@ the NanoTimeLatency test in this package).
 This test is obviously intended to be run on machines with 2 or more vcores (tests on single vcore machines will
 produce understandably outrageously long runtimes).
  
-(If needed) Prepare the SpinLoopHint.jar by running:
+(If needed) Prepare the SpinHintTest.jar by running:
  
     % mvn clean install
 
 The simplest way to run this test is:
 
-    % ${JAVA_HOME}/bin/java -jar SpinLoopHint.jar
+    % ${JAVA_HOME}/bin/java -jar SpinHintTest.jar
 
 Since the test is intended to highlight the benefits of an intrinsic Runtime.onSpinWait(), using a prototype JDK
 that that intrinsifies org.performancehints.Runtime.onSpinWait() as a PAUSE instruction
 (see links below), is obviously recommended. Using such a JDK, you can compare the output of:
 
-    % ${JAVA_HOME}/bin/java -XX:-UseSpinLoopHintIntrinsic -jar SpinLoopHint.jar > intrinsicSpinHint.hgrm
+    % ${JAVA_HOME}/bin/java -XX:-UseOnSpinWaitIntrinsic -jar SpinHintTest.jar > intrinsicSpinHint.hgrm
 
 and 
     
-    % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -jar SpinLoopHint.jar > vanilla.hgrm
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -jar SpinHintTest.jar > vanilla.hgrm
 
 By plotting them both with [HdrHistogram's online percentile plotter] (http://hdrhistogram.github.io/HdrHistogram/plotFiles.html)
 
@@ -48,7 +48,7 @@ For consistent measurement, it is recommended that this test be executed while
 binding the process to specific cores. E.g. on a Linux system, the following
 command can be used:
 
-    % taskset -c 23,47 ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -jar SpinLoopHint.jar
+    % taskset -c 23,47 ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -jar SpinHintTest.jar
     
 To place the spinning threads on the same core. (the choice of cores 23 and 47 is specific
 to a 48 vcore system where cores 23 and 47 represent two hyper-threads on a common core. You will want
@@ -56,7 +56,7 @@ to identofy a matching pair on your specific system).
  
 ###Plotting results:
  
-SpinLoopHint outputs a percentile histogram distribution in [HdrHistogram](http://hdrhistogram.org)'s common
+SpinHintTrst outputs a percentile histogram distribution in [HdrHistogram](http://hdrhistogram.org)'s common
 .hgrm format. This output can/shuld be redirected to an .hgrm file (e.g. vanilla.hgrm),
 which can then be directly plotted using tools like [HdrHistogram's online percentile plotter] (http://hdrhistogram.github.io/HdrHistogram/plotFiles.html)
 
@@ -65,11 +65,11 @@ which can then be directly plotted using tools like [HdrHistogram's online perce
 
 A prototype OpenJDK implementation that implements org.performancehints.Runtime.onSpinWait() as a PAUSE instruction
 on x86-64 is available. Relevant Webrevs can be found here:  
-- HotSpot: [http://ivankrylov.github.io/spinloophint/webrev/]  
-- JDK: [http://ivankrylov.github.io/spinloophint/webrev.jdk/]  
-- Build environment: [http://ivankrylov.github.io/spinloophint/webrev.main/]  
+- HotSpot: [http://ivankrylov.github.io/onspinwait/webrev/]  
+- JDK: [http://ivankrylov.github.io/onspinwait/webrev.jdk/]  
+- Build environment: [http://ivankrylov.github.io/onspinwait/webrev.main/]  
       
-A downloadable working OpenJDK9-based JDK (which accepts an optional -XX:+UseSpinLoopHintIntrinsic flag to turn the
+A downloadable working OpenJDK9-based JDK (which accepts an optional -XX:+UseOnSpinWaitIntrinsic flag to turn the
 feature on) can be found here:   
 - Linux: [https://www.dropbox.com/l/s/K4MgrJ0UD2VfddOwmkvflp]  
 - Mac: [https://www.dropbox.com/s/h11zcyjhyq2q358/slh-openjdk-9-b70-bin-mac-x64.tar.gz?dl=0]  
@@ -82,16 +82,16 @@ beahvior:
 
 To test pure ping pong throughput test with no latency measurement overhead:
 
-    % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar SpinHintThroughput
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinHintTest.jar SpinHintThroughput
 
 To test the behvaior of thread ping-pong latencies when loops alternate between using Runtime.onSpinWait()
 (for the duration of the loop) and not using it (for the duration of the next loop):
 
-    % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar AlternatingSpinHintTest
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinHintTest.jar AlternatingSpinHintTest
     
 To document the latency of measure time with System.nanoTime() (so that it can be discounted when
 observing ping pong latecies in the latency measuring tests):
 
-    % ${JAVA_HOME}/bin/java -XX:+UseSpinLoopHintIntrinsic -cp SpinHintTest.jar NanoTimeLatency
+    % ${JAVA_HOME}/bin/java -XX:+UseOnSpinWaitIntrinsic -cp SpinHintTest.jar NanoTimeLatency
     
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
