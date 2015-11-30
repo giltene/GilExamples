@@ -84,7 +84,7 @@ name will be determined as part of development of this JEP.
 An empty method would be a valid implementation of the Runtime.onSpinWait() method,
 but intrisic implementation is the obvious goal for hardware platforms that can benefit
 from it. We intend to produce an intrinsic x86 implementation for OpenJDK as part
-of developing this JEP. A prototype implementation already exists [4] [5] [6] and
+of developing this JEP. A prototype implementation already exists [4] [5] [6] [7] and
 results from initial testing show promise.
 
 ##Alternatives
@@ -124,6 +124,7 @@ they carry some risks, but no more than other simple intrinsics added to the JDK
 [3] Chart depicting onSpinWait() intrinsification impact [https://github.com/giltene/GilExamples/blob/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png]    
 [4] HotSpot WebRevs for prototype implementation which intrinsifies org.performancehints.Runtime.onSpinWait() [http://ivankrylov.github.io/onspinwait/9b94.hs.webrev/]    
 [5] JDK WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/onspinwait/9b94.jdk.webrev/]    
-[6] Link to a working Linux protoype OpenJDK9-based JDK (accepts optional -XX:++UseOnSpinWaitIntrinsic) [https://www.dropbox.com/s/r2w1s1jykr2qs01/slh-openjdk-9-b70-bin-linux-x64.tar.gz?dl=0]    
+[6] Link to a working Linux protoype OpenJDK9-based JDK (accepts optional -XX:++UseOnSpinWaitIntrinsic) [https://goo.gl/v3G30r]    
+[6] Link to a working Mac OS protoype OpenJDK9-based JDK (accepts optional -XX:++UseOnSpinWaitIntrinsic) [https://goo.gl/LTlyRd]    
 
 [example results]:https://raw.github.com/giltene/GilExamples/master/SpinHintTest/SpinLoopLatency_E5-2697v2_sharedCore.png "Example Results on E5-2697v2"
