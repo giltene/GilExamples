@@ -65,8 +65,8 @@ which can then be directly plotted using tools like [HdrHistogram's online perce
 
 A prototype OpenJDK implementation that implements org.performancehints.Runtime.onSpinWait() as a PAUSE instruction
 on x86-64 is available. Relevant Webrevs can be found here:  
-- HotSpot: [http://ivankrylov.github.io/onspinwait/jdk9b94.hs.webrev/]  
-- JDK: [http://ivankrylov.github.io/onspinwait/jdk9b94.jdk.webrev/]  
+- HotSpot: [http://ivankrylov.github.io/onspinwait/9b94.hs.webrev/]  
+- JDK: [http://ivankrylov.github.io/onspinwait/9b94.jdk.webrev/]  
       
 A downloadable working OpenJDK9-based JDK (which accepts an optional -XX:+UseOnSpinWaitIntrinsic flag to turn the
 feature on) can be found here:   
