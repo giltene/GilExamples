@@ -124,8 +124,8 @@ they carry some risks, but no more than other simple intrinsics added to the JDK
 [3] Chart depicting onSpinWait() intrinsification impact [https://github.com/giltene/GilExamples/blob/master/SpinWaitTest/SpinLoopLatency_E5-2697v2_sharedCore.png]    
 [4] HotSpot WebRevs for prototype implementation which intrinsifies org.performancehints.Runtime.onSpinWait() [http://ivankrylov.github.io/onspinwait/9b94.hs.webrev/]    
 [5] JDK WebRevs for prototype intrinsifying implementation: [http://ivankrylov.github.io/onspinwait/9b94.jdk.webrev/]    
-[6] Link to a working Linux x86 protoype OpenJDK9-based JDK (accepts optional -XX:++UseOnSpinWaitIntrinsic) [https://goo.gl/v3G30r]    
-[7] Link to a working Mac OS x86 protoype OpenJDK9-based JDK (accepts optional -XX:++UseOnSpinWaitIntrinsic) [https://goo.gl/LTlyRd]    
+[6] Link to a working Linux x86 protoype OpenJDK9-based JDK (accepts optional -XX:+UseOnSpinWaitIntrinsic) [https://goo.gl/v3G30r]    
+[7] Link to a working Mac OS x86 protoype OpenJDK9-based JDK (accepts optional -XX:+UseOnSpinWaitIntrinsic) [https://goo.gl/LTlyRd]    
 [8] Implementations on other platforms (other than x86) may choose to use the same instructions as [linux cpu_relax](http://lxr.free-electrons.com/ident?i=cpu_relax)
         and/or [plasma_spin](https://github.com/gstrauss/plasma/blob/master/plasma_spin.h)
         
