@@ -76,7 +76,7 @@ A downloadable working x86 OpenJDK9-based JDK (which accepts an optional -XX:+Us
 feature on) can be found here:   
 - Linux: [https://goo.gl/v3G30r]  
 - Mac: [https://goo.gl/LTlyRd]  
-- Windows: [Will arrive later]  
+- Windows: [http://tinyurl.com/qzhsolv]  
 
 #### Additional tests
 
