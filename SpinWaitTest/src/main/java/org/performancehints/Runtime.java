@@ -23,11 +23,11 @@ public final class Runtime {
     private Runtime() {
     }
 
-    /**
-     * Method signifying that the caller is momentarily unable to
-     * progress until the occurrence of one or more actions of one or
-     * more other activities.  When invoked within each iteration, this
-     * method typically improves performance of spin wait loop
+    /** Indicates that the caller is momentarily unable to progress, until the
+     * occurrence of one or more actions on the part of other activities.  By
+     * invoking this method within each iteration of a spin-wait loop construct,
+     * the calling thread indicates to the runtime that it is busy-waiting. The runtime
+     * may take action to improve the performance of invoking spin-wait loop
      * constructions.
      */
     public static void onSpinWait() {
