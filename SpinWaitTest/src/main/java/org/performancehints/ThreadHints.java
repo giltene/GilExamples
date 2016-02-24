@@ -1,9 +1,21 @@
+/*
+ * Written by Gil Tene, and released to the public domain,
+ * as explained at http://creativecommons.org/publicdomain/zero/1.0/
+ */
+
 package org.performancehints;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
+/**
+ * This class captures possible performance hints that may be used by some
+ * runtimes to improve code performance. It is intended to capture hinting
+ * behaviors that are implemented in or anticipated to be spec'ed under the
+ * java.lang.Thread class in some Java SE versions, but missing in prior
+ * versions.
+ */
 public final class ThreadHints {
 
     private static final MethodHandle onSpinWaitMH;
