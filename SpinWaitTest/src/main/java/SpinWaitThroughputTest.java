@@ -5,7 +5,7 @@
  * @author Gil Tene
  */
 
-import org.performancehints.Runtime;
+import org.performancehints.ThreadHints;
 
 /**
  * A simple thread-to-thread communication latency test that measures and reports on the
@@ -35,7 +35,7 @@ public class SpinWaitThroughputTest {
     public static volatile long spinData; // even: ready to produce; odd: ready to consume; -3: terminate
     public static volatile long totalSpins = 0;
 
-    static class Producer extends Thread {
+    static class Producer extends java.lang.Thread {
         final long iterations;
 
         Producer(final long terminatingIterationCount) {
@@ -46,7 +46,7 @@ public class SpinWaitThroughputTest {
             for (long i = 0; i < iterations; i++) {
                 while ((spinData & 0x1) == 1) {
                     // busy spin until ready to produce
-                    Runtime.onSpinWait();
+                    ThreadHints.onSpinWait();
                     spins++;
                 }
                 spinData++; // produce
@@ -64,12 +64,12 @@ public class SpinWaitThroughputTest {
         }
     }
 
-    static class Consumer extends Thread {
+    static class Consumer extends java.lang.Thread {
         public void run() {
             while (spinData >= 0) {
                 while ((spinData & 0x1) == 0) {
                     // busy spin until ready to consume
-                    Runtime.onSpinWait();
+                    ThreadHints.onSpinWait();
                 }
                 spinData++; // consume
             }
@@ -78,8 +78,8 @@ public class SpinWaitThroughputTest {
 
     public static void main(final String[] args) {
         try {
-            Thread producer;
-            Thread consumer;
+            java.lang.Thread producer;
+            java.lang.Thread consumer;
 
             for (int i = 0; i < WARMUP_PASS_COUNT; i++) {
                 spinData = 0;
@@ -93,7 +93,7 @@ public class SpinWaitThroughputTest {
                 consumer.join();
             }
 
-            Thread.sleep(1000); // Let things (like JIT compilations) settle down.
+            java.lang.Thread.sleep(1000); // Let things (like JIT compilations) settle down.
             System.out.println("# Warmup done. Restarting threads.");
 
             spinData = 0;

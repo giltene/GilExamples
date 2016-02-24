@@ -6,7 +6,7 @@
  */
 
 import org.HdrHistogram.Histogram;
-import org.performancehints.Runtime;
+import org.performancehints.ThreadHints;
 
 import java.util.Locale;
 
@@ -34,7 +34,7 @@ public class AlternatingOnSpinWaitTest {
     public static final Histogram noHintLatencyHistogram = new Histogram(3600L * 1000L * 1000L * 1000L, 2);
     public static final Histogram withHintLatencyHistogram = new Histogram(3600L * 1000L * 1000L * 1000L, 2);
 
-    static class Producer extends Thread {
+    static class Producer extends java.lang.Thread {
         final long iterations;
         Producer(final long terminatingIterationCount) {
             this.iterations = terminatingIterationCount;
@@ -48,7 +48,7 @@ public class AlternatingOnSpinWaitTest {
 
                 while ((spinData & 0x1) == 1) {
                     // busy spin until ready to produce
-                    Runtime.onSpinWait();
+                    ThreadHints.onSpinWait();
                 }
                 long currTime = System.nanoTime();
                 withHintLatencyHistogram.recordValue(currTime - prevTime);
@@ -75,12 +75,12 @@ public class AlternatingOnSpinWaitTest {
         }
     }
 
-    static class Consumer extends Thread {
+    static class Consumer extends java.lang.Thread {
         public void run() {
             while (spinData >= 0) {
                 while ((spinData & 0x1) == 0) {
                     // busy spin until ready to consume
-                    Runtime.onSpinWait();
+                    ThreadHints.onSpinWait();
                 }
                 spinData++; // consume
             }
@@ -90,8 +90,8 @@ public class AlternatingOnSpinWaitTest {
     public static void main(final String[] args) {
         try {
 
-            Thread producer;
-            Thread consumer;
+            java.lang.Thread producer;
+            java.lang.Thread consumer;
 
             for (int i = 0; i < WARMUP_PASS_COUNT; i++) {
                 spinData = 0;
@@ -108,7 +108,7 @@ public class AlternatingOnSpinWaitTest {
                 withHintLatencyHistogram.reset();
             }
 
-            Thread.sleep(1000); // Let things (like JIT compilations) settle down.
+            java.lang.Thread.sleep(1000); // Let things (like JIT compilations) settle down.
             System.out.println("# Warmup done. Restarting threads.");
 
             spinData = 0;

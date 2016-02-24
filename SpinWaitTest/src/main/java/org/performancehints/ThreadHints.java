@@ -4,7 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-public final class Runtime {
+public final class ThreadHints {
 
     private static final MethodHandle onSpinWaitMH;
 
@@ -12,7 +12,7 @@ public final class Runtime {
         MethodHandle mh;
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         try {
-            mh = lookup.findStatic(java.lang.Runtime.class, "onSpinWait", MethodType.methodType(void.class));
+            mh = lookup.findStatic(java.lang.Thread.class, "onSpinWait", MethodType.methodType(void.class));
         } catch (Exception e) {
             mh = null;
         }
@@ -20,7 +20,7 @@ public final class Runtime {
     }
 
     // prevent construction...
-    private Runtime() {
+    private ThreadHints() {
     }
 
     /** Indicates that the caller is momentarily unable to progress, until the

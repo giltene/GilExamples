@@ -6,7 +6,7 @@
  */
 
 import org.HdrHistogram.Histogram;
-import org.performancehints.Runtime;
+import org.performancehints.ThreadHints;
 
 /**
  * A simple thread-to-thread communication latency test that measures and reports on the
@@ -40,7 +40,7 @@ public class SpinWaitTest {
 
     public static final Histogram latencyHistogram = new Histogram(3600L * 1000L * 1000L * 1000L, 2);
 
-    static class Producer extends Thread {
+    static class Producer extends java.lang.Thread {
         final long iterations;
         Producer(final long terminatingIterationCount) {
             this.iterations = terminatingIterationCount;
@@ -50,7 +50,7 @@ public class SpinWaitTest {
             for (long i = 0; i < iterations; i++) {
                 while ((spinData & 0x1) == 1) {
                     // busy spin until ready to produce
-                    Runtime.onSpinWait();
+                    ThreadHints.onSpinWait();
                 }
                 long currTime = System.nanoTime();
                 latencyHistogram.recordValue(currTime - prevTime);
@@ -68,12 +68,12 @@ public class SpinWaitTest {
         }
     }
 
-    static class Consumer extends Thread {
+    static class Consumer extends java.lang.Thread {
         public void run() {
             while (spinData >= 0) {
                 while ((spinData & 0x1) == 0) {
                     // busy spin until ready to consume
-                    Runtime.onSpinWait();
+                    ThreadHints.onSpinWait();
                 }
                 spinData++; // consume
             }
@@ -82,8 +82,8 @@ public class SpinWaitTest {
 
     public static void main(final String[] args) {
         try {
-            Thread producer;
-            Thread consumer;
+            java.lang.Thread producer;
+            java.lang.Thread consumer;
 
             for (int i = 0; i < WARMUP_PASS_COUNT; i++) {
                 spinData = 0;
@@ -99,7 +99,7 @@ public class SpinWaitTest {
                 latencyHistogram.reset();
             }
 
-            Thread.sleep(1000); // Let things (like JIT compilations) settle down.
+            java.lang.Thread.sleep(1000); // Let things (like JIT compilations) settle down.
             System.out.println("# Warmup done. Restarting threads.");
 
             spinData = 0;
