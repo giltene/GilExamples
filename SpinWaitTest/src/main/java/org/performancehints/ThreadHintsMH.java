@@ -22,7 +22,6 @@ final class ThreadHintsMH {
 
     static {
         MethodHandle mh;
-        System.out.println("Initializing ThreadHintsMH");
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         try {
             mh = lookup.findStatic(java.lang.Thread.class, "onSpinWait", MethodType.methodType(void.class));
