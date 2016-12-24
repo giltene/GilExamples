@@ -119,7 +119,7 @@ public class HistogramGenerator extends Thread {
                                 "[-gammaLevel gammaLevel] [-gammaShape gammaShape] [-gammaScale gammaScale] " +
                                 "[-stallLevel stallLevel] [-stallLikelihood stallLikelihood]" +
                                 "[-backlogCountLevel backlogCountLevel] [-backlogLikelihood backlogLikelihood]" +
-                                "[-interval interval]";
+                                "[-outputValueUnitRatio outputValueUnitRatio] [-interval interval]";
 
                 System.err.println("valid arguments = " + validArgs);
 
