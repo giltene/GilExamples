@@ -5,10 +5,6 @@
 
 package org.performancehints;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-
 /**
  * This class captures possible performance hints that may be used by some
  * runtimes to improve code performance. It is intended to capture hinting
@@ -16,26 +12,30 @@ import java.lang.invoke.MethodType;
  * java.lang.Thread class in some Java SE versions, but missing in prior
  * versions.
  */
+
 public final class ThreadHints {
 
-    private static final MethodHandle onSpinWaitMH;
+    private static final boolean okToInvokeThreadHintsMHCaller;
 
     static {
-        MethodHandle mh;
-        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        boolean okToInvokeMHCaller;
+
         try {
-            mh = lookup.findStatic(java.lang.Thread.class, "onSpinWait", MethodType.methodType(void.class));
+            Class.forName("java.lang.invoke.MethodHandle");
+            okToInvokeMHCaller = true;
         } catch (Exception e) {
-            mh = null;
+            okToInvokeMHCaller = false;
         }
-        onSpinWaitMH = mh;
+        // okToInvokeThreadHintsMHCaller will be false for e.g. Java SE 6 and earlier:
+        okToInvokeThreadHintsMHCaller = okToInvokeMHCaller;
     }
 
     // prevent construction...
     private ThreadHints() {
     }
 
-    /** Indicates that the caller is momentarily unable to progress, until the
+    /**
+     * Indicates that the caller is momentarily unable to progress, until the
      * occurrence of one or more actions on the part of other activities.  By
      * invoking this method within each iteration of a spin-wait loop construct,
      * the calling thread indicates to the runtime that it is busy-waiting. The runtime
@@ -43,14 +43,8 @@ public final class ThreadHints {
      * constructions.
      */
     public static void onSpinWait() {
-        // Call java.lang.Runtime.onSpinWait() on Java SE versions that support it. Do nothing otherwise.
-        // This should optimize away to either nothing or to an inlining of java.lang.Runtime.onSpinWait()
-        if (onSpinWaitMH != null) {
-            try {
-                onSpinWaitMH.invokeExact();
-            } catch (Throwable throwable) {
-                // Nothing to do here...
-            }
+        if (okToInvokeThreadHintsMHCaller) {
+            ThreadHintsMH.onSpinWait();
         }
     }
 }
