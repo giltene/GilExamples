@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Warmup(iterations = 7, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Fork(3)
+@Fork(1)
 @State(Scope.Thread)
 
 public class MethodInliningExampleBench {
