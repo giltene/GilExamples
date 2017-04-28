@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>Examples</groupId>
-    <version>2.1.9</version>
+    <version>0.2.1</version>
 
     <artifactId>CodeGenExample-benchmarks</artifactId>
     <name>CodeGenExampleBenchmarks</name>
