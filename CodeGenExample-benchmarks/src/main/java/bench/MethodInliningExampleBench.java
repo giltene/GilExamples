@@ -35,7 +35,7 @@ public class MethodInliningExampleBench {
     int benchLoopCount;
     
 
-    public static void mySleep0(int t) {
+    public static void noRetValInnerIntLoop(int t) {
         int x = 0;
         for(int i = 0; i < t * 10000; i++) {
             x += (t ^ x) % 93;
@@ -43,16 +43,7 @@ public class MethodInliningExampleBench {
         return;
     }
 
-    public static int mySleep1(int t) {
-        int x = 0;
-        for(int i = 0; i < t * 10000; i++) {
-            x += (t ^ x) % 93;
-        }
-        return x;
-    }
-
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public static int mySleep2(int t) {
+    public static int retValInnerIntLoop(int t) {
         int x = 0;
         for(int i = 0; i < t * 10000; i++) {
             x += (t ^ x) % 93;
@@ -61,7 +52,16 @@ public class MethodInliningExampleBench {
     }
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public static void mySleep3(int t) {
+    public static int retValInnerIntLoopNoInlining(int t) {
+        int x = 0;
+        for(int i = 0; i < t * 10000; i++) {
+            x += (t ^ x) % 93;
+        }
+        return x;
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    public static void noRetValInnerIntLoopNoInlining(int t) {
         int x = 0;
         for(int i = 0; i < t * 10000; i++) {
             x += (t ^ x) % 93;
@@ -69,7 +69,7 @@ public class MethodInliningExampleBench {
         return;
     }
 
-    public static void mySleepL0(long t) {
+    public static void noRetValInnerLongLoop(long t) {
         long x = 0;
         for(int i = 0; i < t * 10000; i++) {
             x += (t ^ x) % 93;
@@ -77,7 +77,7 @@ public class MethodInliningExampleBench {
         return;
     }
 
-    public static long mySleepL1(long t) {
+    public static long retValInnerLongLoop(long t) {
         long x = 0;
         for(int i = 0; i < t * 10000; i++) {
             x += (t ^ x) % 93;
@@ -86,7 +86,7 @@ public class MethodInliningExampleBench {
     }
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public static long mySleepL2(long t) {
+    public static long retValInnerLongLoopNoInlining(long t) {
         long x = 0;
         for(int i = 0; i < t * 10000; i++) {
             x += (t ^ x) % 93;
@@ -95,7 +95,7 @@ public class MethodInliningExampleBench {
     }
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public static void mySleepL3(long t) {
+    public static void noRetValInnerLongLoopNoInlining(long t) {
         long x = 0;
         for(int i = 0; i < t * 10000; i++) {
             x += (t ^ x) % 93;
@@ -104,58 +104,58 @@ public class MethodInliningExampleBench {
     }
 
     @Benchmark
-    public void doMySleep0() {
+    public void noRetValIntLoop() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleep0(sleepArg);
+            noRetValInnerIntLoop(sleepArg);
         }
     }
 
     @Benchmark
-    public void doMySleep1() {
+    public void retValIntLoop() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleep1(sleepArg);
+            retValInnerIntLoop(sleepArg);
         }
     }
 
     @Benchmark
-    public void doMySleep2() {
+    public void retValIntLoopNoInlining() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleep2(sleepArg);
+            retValInnerIntLoopNoInlining(sleepArg);
         }
     }
 
     @Benchmark
-    public void doMySleep3() {
+    public void noRetValIntLoopNoInlining() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleep3(sleepArg);
+            noRetValInnerIntLoopNoInlining(sleepArg);
         }
     }
 
     @Benchmark
-    public void doMySleepL0() {
+    public void noRetValLongLoop() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleepL0(sleepArg);
+            noRetValInnerIntLoop(sleepArg);
         }
     }
 
     @Benchmark
-    public void doMySleepL1() {
+    public void retValLongLoop() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleepL1(sleepArg);
+            retValInnerLongLoop(sleepArg);
         }
     }
 
     @Benchmark
-    public void doMySleepL2() {
+    public void retValLongLoopNoInlining() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleepL2(sleepArg);
+            retValInnerLongLoopNoInlining(sleepArg);
         }
     }
 
     @Benchmark
-    public void doMySleepL3() {
+    public void noRetValLongLoopNoInlining() {
         for (int i = 0; i < benchLoopCount; i++) {
-            mySleepL3(sleepArg);
+            noRetValInnerLongLoopNoInlining(sleepArg);
         }
     }
 
