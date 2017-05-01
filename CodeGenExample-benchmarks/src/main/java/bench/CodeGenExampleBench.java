@@ -33,13 +33,13 @@ public class CodeGenExampleBench {
         ListElement next;
     }
 
-    @Param({"4096"})
+    @Param({"65536"})
     int arraySize;
 
-    @Param({"1000000"})
+    @Param({"10000"})
     int loopCount;
 
-    @Param({"1000"})
+    @Param({"100"})
     int benchLoopCount;
 
     int[] sumLoopArray;
@@ -109,6 +109,15 @@ public class CodeGenExampleBench {
     }
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    private int sumShifted(int shiftRightBy, int maskAfterShift, int a[]) {
+        int sum = 0;
+        for (int i = 0; i < a.length; i++) {
+            sum += (a[i] >> shiftRightBy) & maskAfterShift;
+        }
+        return sum;
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
 
     public void loopUbench0(int count) {
         long sum = 0;
@@ -162,15 +171,6 @@ public class CodeGenExampleBench {
         long sum = 0;
         for (int i = 0; i < count; i++) {
             sum += i + ((i - 3) & 0x7);
-        }
-        return sum;
-    }
-
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    private int sumShifted(int shiftRightBy, int maskAfterShift, int a[]) {
-        int sum = 0;
-        for (int i = 0; i < a.length; i++) {
-            sum += (a[i] >> shiftRightBy) & maskAfterShift;
         }
         return sum;
     }
@@ -315,7 +315,7 @@ public class CodeGenExampleBench {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void doAll() {
         for (int i = 0; i < benchLoopCount; i++) {
             doUbenchLoops();
