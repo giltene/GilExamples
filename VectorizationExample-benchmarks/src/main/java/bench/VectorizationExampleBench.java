@@ -146,4 +146,19 @@ public class VectorizationExampleBench {
         }
         sum = sumLoop(addArraysIfEvenArrayA);
     }
+
+//  Useful [only] for keeping the code hot and running for viewing in profiling tools:
+//    @Benchmark
+    public void doAll() {
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            sum += sumLoop(sumLoopArray);
+            sum += sumIfEvenLoop(sumLoopArray);
+            sum += sumShifted(3, 0x7f, sumLoopArray);
+            addXtoArray(i, addXArray);
+            sum += sumLoop(addXArray);
+            addArraysIfEven(addArraysIfEvenArrayA, addArraysIfEvenArrayB);
+            sum += sumLoop(addArraysIfEvenArrayA);
+        }
+    }
+
 }
