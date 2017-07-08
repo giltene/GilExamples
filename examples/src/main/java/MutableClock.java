@@ -40,14 +40,15 @@ public class MutableClock {
         instantHolder.set(newInstant);
     }
 
-    void add(Duration amountToAdd) {
+    public void add(Duration amountToAdd) {
         boolean success = false;
         do {
-            Object holderContents = instantHolder.get();
-            Instant newInstant = ((Instant) holderContents).plus(amountToAdd);
+            Object currentContents = instantHolder.get();
+            // ((Instant) currentContents) may have no identity, but currentContents does...
+            Instant newInstant = ((Instant) currentContents).plus(amountToAdd);
             // Compare part of CAS would not be valid for an Instant field,
             // but is valid for an Object field:
-            success = instantHolder.compareAndSet(holderContents, newInstant);
+            success = instantHolder.compareAndSet(currentContents, newInstant);
         } while (!success);
 
         // the above is equivalent to this, I believe:
