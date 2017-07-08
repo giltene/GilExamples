@@ -52,7 +52,7 @@ public class MutableClock {
         } while (!success);
 
         // the above is equivalent to this, I believe:
-        //   instantHolder.updateAndGet(instant -> ((Instant)instant).plus(amountToAdd));
+        //   instantHolder.updateAndGet(contents -> ((Instant)contents).plus(amountToAdd));
     }
 
     public MutableClock withZone(final ZoneId newZone) {
