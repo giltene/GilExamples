@@ -13,22 +13,23 @@ public class MutableClock {
 
     public static MutableClock create(final Instant instant, final ZoneId zone) {
         return new MutableClock(
-                new AtomicReference<>(new BoxedInstant(instant)),
+                new AtomicReference<>(instant),
                 zone);
     }
 
-    private final AtomicReference<BoxedInstant> instantHolder;
+    // Instants are held in an Object field to allow identity-based CAS operations:
+    private final AtomicReference<Object> instantHolder;
     private final ZoneId zone;
 
     private MutableClock(
-            final AtomicReference<BoxedInstant> instantHolder,
+            final AtomicReference<Object> instantHolder,
             final ZoneId zone) {
         this.instantHolder = instantHolder;
         this.zone = zone;
     }
 
     public Instant instant() {
-        return instantHolder.get().getInstant();
+        return (Instant) instantHolder.get();
     }
 
     public ZoneId getZone() {
@@ -36,43 +37,26 @@ public class MutableClock {
     }
 
     public void setInstant(final Instant newInstant) {
-        BoxedInstant boxedInstant = instantHolder.get();
-        boxedInstant.setInstant(newInstant);
-        instantHolder.set(boxedInstant); // to force volatile write
+        instantHolder.set(newInstant);
     }
 
-    public void add(final Duration amountToAdd) {
-        boolean success;
+    void add(Duration amountToAdd) {
+        boolean success = false;
         do {
-            BoxedInstant currentBoxedInstance = instantHolder.get();
-            BoxedInstant newBoxedInstant =
-                    new BoxedInstant(currentBoxedInstance.getInstant().plus(amountToAdd));
-            success = instantHolder.compareAndSet(currentBoxedInstance, newBoxedInstant);
+            Object holderContents = instantHolder.get();
+            Instant newInstant = ((Instant) holderContents).plus(amountToAdd);
+            // Compare part of CAS would not be valid for an Instant field,
+            // but is valid for an Object field:
+            success = instantHolder.compareAndSet(holderContents, newInstant);
         } while (!success);
+
+        // the above is equivalent to this, I believe:
+        //   instantHolder.updateAndGet(instant -> ((Instant)instant).plus(amountToAdd));
     }
 
     public MutableClock withZone(final ZoneId newZone) {
         // conveniently, AtomicReference also acts as a
         // vehicle for "shared updates" between instances:
         return new MutableClock(instantHolder, newZone);
-    }
-
-    private static class BoxedInstant {
-        private Instant instant;
-
-        BoxedInstant(final Instant instant) {
-            setInstant(instant);
-        }
-
-        Instant getInstant() {
-            return instant;
-        }
-
-        void setInstant(final Instant instant) {
-            if (instant == null) {
-                throw new UnsupportedOperationException("null instants are unsupported");
-            }
-            this.instant = instant;
-        }
     }
 }
