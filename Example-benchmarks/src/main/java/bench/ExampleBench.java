@@ -42,7 +42,7 @@ public class ExampleBench {
             this.buf = new byte[length];
         }
 
-        long sumBuf1() {
+        long bufSum1() {
             long sum = 0;
             for (int i = 0; i < buf.length; i++) {
                 sum += buf[i] + baseVal;
@@ -50,7 +50,7 @@ public class ExampleBench {
             return sum;
         }
 
-        long sumBuf2() {
+        long bufSum2() {
             long sum = 0;
             for (byte b: buf) {
                 sum += b + baseVal;
@@ -58,7 +58,7 @@ public class ExampleBench {
             return sum;
         }
 
-        long sumBuf3() {
+        long bufSum3() {
             long sum = 0;
             byte[] localBuf = buf;
             for (int i = 0; i < localBuf.length; i++) {
@@ -81,16 +81,16 @@ public class ExampleBench {
 
     @Benchmark
     public void sum1() {
-        sum += buffer.sumBuf1();
+        sum += buffer.bufSum1();
     }
 
     @Benchmark
     public void sum2() {
-        sum += buffer.sumBuf2();
+        sum += buffer.bufSum2();
     }
 
     @Benchmark
     public void sum3() {
-        sum += buffer.sumBuf3();
+        sum += buffer.bufSum3();
     }
 }
