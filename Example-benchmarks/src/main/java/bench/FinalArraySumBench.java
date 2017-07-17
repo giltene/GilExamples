@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Fork(3)
 @State(Scope.Thread)
 
-public class ExampleBench {
+public class FinalArraySumBench {
 
 
     @Param({"4096"})
