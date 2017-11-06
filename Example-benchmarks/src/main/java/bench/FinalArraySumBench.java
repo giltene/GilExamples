@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class FinalArraySumBench {
 
 
-    @Param({"4096"})
+    @Param({"2048"})
     int bufferLength;
 
     static volatile long baseVal = 0;
