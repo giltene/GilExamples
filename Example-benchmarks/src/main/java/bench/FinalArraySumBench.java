@@ -37,9 +37,9 @@ public class FinalArraySumBench {
     long sum = 0;
 
     static class MyBuffer {
-        final byte[] buf;
+        final long[] buf;
         MyBuffer(int length) {
-            this.buf = new byte[length];
+            this.buf = new long[length];
         }
 
         long bufSum1() {
@@ -52,7 +52,7 @@ public class FinalArraySumBench {
 
         long bufSum2() {
             long sum = 0;
-            for (byte b: buf) {
+            for (long b: buf) {
                 sum += b + baseVal;
             }
             return sum;
@@ -60,7 +60,7 @@ public class FinalArraySumBench {
 
         long bufSum3() {
             long sum = 0;
-            byte[] localBuf = buf;
+            long[] localBuf = buf;
             for (int i = 0; i < localBuf.length; i++) {
                 sum += localBuf[i] + baseVal;
             }
