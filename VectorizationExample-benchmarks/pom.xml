@@ -8,7 +8,7 @@
     <version>0.2.1</version>
 
     <artifactId>VectorizationExample-benchmarks</artifactId>
-    <name>VectorizationExample</name>
+    <name>VectorizationExampleBenchmarks</name>
     <packaging>jar</packaging>
 
     <properties>
