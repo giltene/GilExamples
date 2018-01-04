@@ -38,8 +38,13 @@ public class FinalArraySumBench {
 
     static class MyBuffer {
         final long[] buf;
+        long[] nonFinalBuf;
         MyBuffer(int length) {
             this.buf = new long[length];
+            this.nonFinalBuf = new long[length];
+            for (int i = 0; i < length; i++) {
+                buf[i] = nonFinalBuf[i] = i;
+            }
         }
 
         long bufSum1() {
@@ -50,7 +55,33 @@ public class FinalArraySumBench {
             return sum;
         }
 
+        long bufSum1NonFinal() {
+            long sum = 0;
+            for (int i = 0; i < buf.length; i++) {
+                sum += nonFinalBuf[i] + baseVal;
+            }
+            return sum;
+        }
+
+        @CompilerControl(CompilerControl.Mode.DONT_INLINE)
         long bufSum2() {
+            long sum = 0;
+            for (int i = 0; i < buf.length; i++) {
+                sum += buf[i] + baseVal;
+            }
+            return sum;
+        }
+
+        @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+        long bufSum2NonFinal() {
+            long sum = 0;
+            for (int i = 0; i < buf.length; i++) {
+                sum += nonFinalBuf[i] + baseVal;
+            }
+            return sum;
+        }
+
+        long bufSum3() {
             long sum = 0;
             for (long b: buf) {
                 sum += b + baseVal;
@@ -58,11 +89,48 @@ public class FinalArraySumBench {
             return sum;
         }
 
-        long bufSum3() {
+        long bufSum3NonFinal() {
+            long sum = 0;
+            for (long b: nonFinalBuf) {
+                sum += b + baseVal;
+            }
+            return sum;
+        }
+
+        long bufSum4() {
             long sum = 0;
             long[] localBuf = buf;
             for (int i = 0; i < localBuf.length; i++) {
                 sum += localBuf[i] + baseVal;
+            }
+            return sum;
+        }
+
+        long bufSum4NonFinal() {
+            long sum = 0;
+            long[] localBuf = nonFinalBuf;
+            for (int i = 0; i < localBuf.length; i++) {
+                sum += localBuf[i] + baseVal;
+            }
+            return sum;
+        }
+
+        long bufSum5() {
+            long sum = 0;
+            long[] localBuf = buf;
+            long val = baseVal;
+            for (int i = 0; i < localBuf.length; i++) {
+                sum += localBuf[i] + val;
+            }
+            return sum;
+        }
+
+        long bufSum5NonFinal() {
+            long sum = 0;
+            long[] localBuf = nonFinalBuf;
+            long val = baseVal;
+            for (int i = 0; i < localBuf.length; i++) {
+                sum += localBuf[i] + val;
             }
             return sum;
         }
@@ -85,12 +153,47 @@ public class FinalArraySumBench {
     }
 
     @Benchmark
+    public void sum1NonFinal() {
+        sum += buffer.bufSum1NonFinal();
+    }
+
+    @Benchmark
     public void sum2() {
         sum += buffer.bufSum2();
     }
 
     @Benchmark
+    public void sum2NonFinal() {
+        sum += buffer.bufSum2NonFinal();
+    }
+
+    @Benchmark
     public void sum3() {
         sum += buffer.bufSum3();
+    }
+
+    @Benchmark
+    public void sum3NonFinal() {
+        sum += buffer.bufSum3NonFinal();
+    }
+
+    @Benchmark
+    public void sum4() {
+        sum += buffer.bufSum4();
+    }
+
+    @Benchmark
+    public void sum4NonFinal() {
+        sum += buffer.bufSum4NonFinal();
+    }
+
+    @Benchmark
+    public void sum5() {
+        sum += buffer.bufSum5();
+    }
+
+    @Benchmark
+    public void sum5NonFinal() {
+        sum += buffer.bufSum5NonFinal();
     }
 }
