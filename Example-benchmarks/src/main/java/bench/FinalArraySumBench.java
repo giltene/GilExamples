@@ -57,7 +57,7 @@ public class FinalArraySumBench {
 
         long bufSum1NonFinal() {
             long sum = 0;
-            for (int i = 0; i < buf.length; i++) {
+            for (int i = 0; i < nonFinalBuf.length; i++) {
                 sum += nonFinalBuf[i] + baseVal;
             }
             return sum;
@@ -75,7 +75,7 @@ public class FinalArraySumBench {
         @CompilerControl(CompilerControl.Mode.DONT_INLINE)
         long bufSum2NonFinal() {
             long sum = 0;
-            for (int i = 0; i < buf.length; i++) {
+            for (int i = 0; i < nonFinalBuf.length; i++) {
                 sum += nonFinalBuf[i] + baseVal;
             }
             return sum;
