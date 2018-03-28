@@ -1,4 +1,4 @@
-This is a small set of microbennchmark that can be used demonstrate cool AVX2 vectorization capabilities
+This is a small set of microbennchmark that can be used demonstrate cool AVX2 and AVX512 vectorization capabilities
 
 To execute:
 ```
