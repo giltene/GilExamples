@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 public class Support_UnmodifiableCollectionTest extends TestCase {
 
@@ -44,8 +45,14 @@ public class Support_UnmodifiableCollectionTest extends TestCase {
         col = c;
     }
 
+    @Test
+    public void testEmpty() {
+    }
+
     @Override
     public void runTest() {
+        if (col == null)
+            return;
 
         // contains
         assertTrue("UnmodifiableCollectionTest - should contain 0", col

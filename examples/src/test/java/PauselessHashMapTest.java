@@ -35,6 +35,7 @@ import java.util.TreeMap;
 
 import tests.support.Support_MapTest2;
 import tests.support.Support_UnmodifiableCollectionTest;
+import org.junit.Test;
 
 public class PauselessHashMapTest extends junit.framework.TestCase {
     class MockMap extends AbstractMap {
@@ -113,6 +114,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#PauselessHashMap()
      */
+    @Test
     public void test_Constructor() {
         // Test for method java.util.PauselessHashMap()
         new Support_MapTest2(new PauselessHashMap()).runTest();
@@ -124,6 +126,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#PauselessHashMap(int)
      */
+    @Test
     public void test_ConstructorI() {
         // Test for method java.util.PauselessHashMap(int)
         PauselessHashMap hm2 = new PauselessHashMap(5);
@@ -145,6 +148,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#PauselessHashMap(int, float)
      */
+    @Test
     public void test_ConstructorIF() {
         // Test for method java.util.PauselessHashMap(int, float)
         PauselessHashMap hm2 = new PauselessHashMap(5, (float) 0.5);
@@ -166,6 +170,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#PauselessHashMap(java.util.Map)
      */
+    @Test
     public void test_ConstructorLjava_util_Map() {
         // Test for method java.util.PauselessHashMap(java.util.Map)
         Map myMap = new TreeMap();
@@ -200,6 +205,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#clear()
      */
+    @Test
     public void test_clear() {
         hm.clear();
         assertEquals("Clear failed to reset size", 0, hm.size());
@@ -222,6 +228,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#clone()
      */
+    @Test
     public void test_clone() {
         // Test for method java.lang.Object java.util.PauselessHashMap.clone()
         PauselessHashMap hm2 = (PauselessHashMap) hm.clone();
@@ -268,6 +275,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#containsKey(java.lang.Object)
      */
+    @Test
     public void test_containsKeyLjava_lang_Object() {
         // Test for method boolean
         // java.util.PauselessHashMap.containsKey(java.lang.Object)
@@ -285,6 +293,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#containsValue(java.lang.Object)
      */
+    @Test
     public void test_containsValueLjava_lang_Object() {
         // Test for method boolean
         // java.util.PauselessHashMap.containsValue(java.lang.Object)
@@ -297,6 +306,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#entrySet()
      */
+    @Test
     public void test_entrySet() {
         // Test for method java.util.Set java.util.PauselessHashMap.entrySet()
         Set s = hm.entrySet();
@@ -317,6 +327,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#get(java.lang.Object)
      */
+    @Test
     public void test_getLjava_lang_Object() {
         // Test for method java.lang.Object
         // java.util.PauselessHashMap.get(java.lang.Object)
@@ -348,6 +359,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * Tests for proxy object keys and values
      */
+    @Test
     public void test_proxies() {
         // Regression for HARMONY-6237
         MockInterface proxyKey = (MockInterface) Proxy.newProxyInstance(
@@ -389,6 +401,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#isEmpty()
      */
+    @Test
     public void test_isEmpty() {
         // Test for method boolean java.util.PauselessHashMap.isEmpty()
         assertTrue("Returned false for new map", new PauselessHashMap().isEmpty());
@@ -398,6 +411,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#keySet()
      */
+    @Test
     public void test_keySet() {
         // Test for method java.util.Set java.util.PauselessHashMap.keySet()
         Set s = hm.keySet();
@@ -451,6 +465,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#put(java.lang.Object, java.lang.Object)
      */
+    @Test
     public void test_putLjava_lang_ObjectLjava_lang_Object() {
         hm.put("KEY", "VALUE");
         assertEquals("Failed to install key/value pair", "VALUE", hm.get("KEY"));
@@ -521,6 +536,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#putAll(java.util.Map)
      */
+    @Test
     public void test_putAllLjava_util_Map() {
         // Test for method void java.util.PauselessHashMap.putAll(java.util.Map)
         PauselessHashMap hm2 = new PauselessHashMap();
@@ -538,6 +554,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#putAll(java.util.Map)
      */
+    @Test
     public void test_putAllLjava_util_Map_Null() {
         PauselessHashMap hashMap = new PauselessHashMap();
         try {
@@ -558,6 +575,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#remove(java.lang.Object)
      */
+    @Test
     public void test_removeLjava_lang_Object() {
         int size = hm.size();
         Integer y = new Integer(9);
@@ -603,6 +621,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
      * Compatibility test to ensure we rehash the same way as the RI.
      * Not required by the spec, but some apps seem sensitive to it.
      */
+    @Test
     public void test_rehash() {
         // This map should rehash on adding the ninth element.
         PauselessHashMap<MyKey, Integer> hm = new PauselessHashMap<MyKey, Integer>(10, 0.5f);
@@ -635,6 +654,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#size()
      */
+    @Test
     public void test_size() {
         // Test for method int java.util.PauselessHashMap.size()
         assertTrue("Returned incorrect size",
@@ -644,6 +664,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.PauselessHashMap#values()
      */
+    @Test
     public void test_values() {
         // Test for method java.util.Collection java.util.PauselessHashMap.values()
         Collection c = hm.values();
@@ -670,6 +691,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests java.util.AbstractMap#toString()
      */
+    @Test
     public void test_toString() {
 
         PauselessHashMap m = new PauselessHashMap();
@@ -700,6 +722,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
         }
     }
 
+    @Test
     public void test_Map_Entry_hashCode() {
         //Related to HARMONY-403
         PauselessHashMap<Integer, Integer> map = new PauselessHashMap<Integer, Integer>(10);
@@ -731,6 +754,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /*
      * Regression test for HY-4750
      */
+    @Test
     public void test_EntrySet() {
         PauselessHashMap map = new PauselessHashMap();
         map.put(new Integer(1), "ONE");
@@ -797,6 +821,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests serialization/deserialization.
      */
+    @Test
     public void testSerializationSelf() throws Exception {
         PauselessHashMap<String, String> hm = new PauselessHashMap<String, String>();
         hm.put("key", "value");
@@ -811,6 +836,7 @@ public class PauselessHashMapTest extends junit.framework.TestCase {
     /**
      * @tests serialization/deserialization compatibility with RI.
      */
+    @Test
     public void testSerializationCompatibility() throws Exception {
         PauselessHashMap<String, String> hm = new PauselessHashMap<String, String>();
         hm.put("key", "value");
