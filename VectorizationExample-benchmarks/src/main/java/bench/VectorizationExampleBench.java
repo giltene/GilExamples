@@ -38,6 +38,7 @@ public class VectorizationExampleBench {
     int[] addXArray;
     int[] addArraysIfEvenArrayA;
     int[] addArraysIfEvenArrayB;
+    boolean[] predicateArray;
 
     long sum;
 
@@ -48,12 +49,14 @@ public class VectorizationExampleBench {
         addXArray = new int[arraySize];
         addArraysIfEvenArrayA = new int[arraySize];
         addArraysIfEvenArrayB = new int[arraySize];
+        predicateArray = new boolean[arraySize];
 
         for (int i = 0; i < arraySize; i++) {
             sumLoopArray[i] = i % 99;
             addXArray[i] = i % 99;
             addArraysIfEvenArrayA[i] = i % 71;
             addArraysIfEvenArrayB[i] = i % 31;
+            predicateArray[i] = (i % 2 == 0);
         }
     }
 
@@ -71,6 +74,17 @@ public class VectorizationExampleBench {
         int sum = 0;
         for (int i = 0; i < a.length; i++) {
             if ((a[i] & 0x1) == 0) {
+                sum += a[i];
+            }
+        }
+        return sum;
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    private int sumIfPredicate(int[] a) {
+        int sum = 0;
+        for (int i = 0; i < a.length; i++) {
+            if (predicateArray[i]) {
                 sum += a[i];
             }
         }
@@ -107,6 +121,18 @@ public class VectorizationExampleBench {
         }
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    private void addArraysIfPredicate(int a[], int b[]) {
+        if (a.length != b.length) {
+            throw new RuntimeException("length mismatch");
+        }
+        for (int i = 0; i < a.length; i++) {
+            if (predicateArray[i]) {
+                a[i] += b[i];
+            }
+        }
+    }
+
 
     @Benchmark
     public void doSumLoop() {
@@ -119,6 +145,13 @@ public class VectorizationExampleBench {
     public void doSumIfEvenLoop() {
         for (int i = 0; i < loopCount; i++) {
             sum += sumIfEvenLoop(sumLoopArray);
+        }
+    }
+
+    @Benchmark
+    public void doSumIfPredicateLoop() {
+        for (int i = 0; i < loopCount; i++) {
+            sum += sumIfPredicate(sumLoopArray);
         }
     }
 
@@ -147,16 +180,27 @@ public class VectorizationExampleBench {
         sum = sumLoop(addArraysIfEvenArrayA);
     }
 
+    @Benchmark
+    public void doAddArraysIfPredicate() {
+        sum = 0;
+        for (int i = 0; i < loopCount; i++) {
+            addArraysIfPredicate(addArraysIfEvenArrayA, addArraysIfEvenArrayB);
+        }
+        sum = sumLoop(addArraysIfEvenArrayA);
+    }
+
 //  Useful [only] for keeping the code hot and running for viewing in profiling tools:
 //    @Benchmark
     public void doAll() {
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             sum += sumLoop(sumLoopArray);
             sum += sumIfEvenLoop(sumLoopArray);
+            sum += sumIfPredicate(sumLoopArray);
             sum += sumShifted(3, 0x7f, sumLoopArray);
             addXtoArray(i, addXArray);
             sum += sumLoop(addXArray);
             addArraysIfEven(addArraysIfEvenArrayA, addArraysIfEvenArrayB);
+            addArraysIfPredicate(addArraysIfEvenArrayA, addArraysIfEvenArrayB);
             sum += sumLoop(addArraysIfEvenArrayA);
         }
     }
