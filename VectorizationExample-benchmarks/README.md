@@ -10,52 +10,164 @@ When run on a Haswell E5-2670 v3 @ 2.30GHz , I observe the following results:
 
 With Zing 18.06:
 ```
-Benchmark                                         (arraySize)  (loopCount)   Mode  Cnt   Score   Error  Units
-VectorizationExampleBench.doAddArraysIfEven             65536        10000  thrpt    5   3.917 ± 0.025  ops/s
-VectorizationExampleBench.doAddArraysIfPredicate        65536        10000  thrpt    5   3.313 ± 0.158  ops/s
-VectorizationExampleBench.doAddX                        65536        10000  thrpt    5   8.586 ± 0.003  ops/s
-VectorizationExampleBench.doSumIfEvenLoop               65536        10000  thrpt    5  13.674 ± 0.015  ops/s
-VectorizationExampleBench.doSumIfPredicateLoop          65536        10000  thrpt    5   4.212 ± 0.001  ops/s
-VectorizationExampleBench.doSumLoop                     65536        10000  thrpt    5  18.733 ± 0.598  ops/s
-VectorizationExampleBench.doSumShiftedLoop              65536        10000  thrpt    5  12.249 ± 0.020  ops/s
+Benchmark                                         (arraySize)  (elementsPerLoop)   Mode  Cnt   Score   Error  Units
+VectorizationExampleBench.doAddArraysIfEven              1024         1000000000  thrpt    5   3.633 ± 0.007  ops/s
+VectorizationExampleBench.doAddArraysIfEven             16384         1000000000  thrpt    5   3.292 ± 0.011  ops/s
+VectorizationExampleBench.doAddArraysIfEven             65536         1000000000  thrpt    5   2.516 ± 0.089  ops/s
+VectorizationExampleBench.doAddArraysIfEven            524288         1000000000  thrpt    5   2.437 ± 0.326  ops/s
+VectorizationExampleBench.doAddArraysIfEven          67108864         1000000000  thrpt    5   1.149 ± 0.023  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate         1024         1000000000  thrpt    5   2.564 ± 0.016  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        16384         1000000000  thrpt    5   2.399 ± 0.005  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        65536         1000000000  thrpt    5   2.160 ± 0.182  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate       524288         1000000000  thrpt    5   2.243 ± 0.002  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate     67108864         1000000000  thrpt    5   1.043 ± 0.056  ops/s
+VectorizationExampleBench.doAddX                         1024         1000000000  thrpt    5   8.198 ± 0.018  ops/s
+VectorizationExampleBench.doAddX                        16384         1000000000  thrpt    5   5.629 ± 0.013  ops/s
+VectorizationExampleBench.doAddX                        65536         1000000000  thrpt    5   5.601 ± 0.008  ops/s
+VectorizationExampleBench.doAddX                       524288         1000000000  thrpt    5   4.273 ± 0.018  ops/s
+VectorizationExampleBench.doAddX                     67108864         1000000000  thrpt    5   1.783 ± 0.024  ops/s
+VectorizationExampleBench.doSumIfEvenLoop                1024         1000000000  thrpt    5  10.266 ± 0.160  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               16384         1000000000  thrpt    5   8.540 ± 1.164  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               65536         1000000000  thrpt    5   9.071 ± 0.025  ops/s
+VectorizationExampleBench.doSumIfEvenLoop              524288         1000000000  thrpt    5   6.495 ± 0.052  ops/s
+VectorizationExampleBench.doSumIfEvenLoop            67108864         1000000000  thrpt    5   2.426 ± 0.042  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop           1024         1000000000  thrpt    5   2.731 ± 0.002  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          16384         1000000000  thrpt    5   2.735 ± 0.005  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          65536         1000000000  thrpt    5   2.745 ± 0.031  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop         524288         1000000000  thrpt    5   2.762 ± 0.025  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop       67108864         1000000000  thrpt    5   1.987 ± 0.219  ops/s
+VectorizationExampleBench.doSumLoop                      1024         1000000000  thrpt    5  15.634 ± 0.979  ops/s
+VectorizationExampleBench.doSumLoop                     16384         1000000000  thrpt    5  12.406 ± 0.619  ops/s
+VectorizationExampleBench.doSumLoop                     65536         1000000000  thrpt    5  12.218 ± 0.026  ops/s
+VectorizationExampleBench.doSumLoop                    524288         1000000000  thrpt    5   6.947 ± 0.007  ops/s
+VectorizationExampleBench.doSumLoop                  67108864         1000000000  thrpt    5   2.466 ± 0.012  ops/s
+VectorizationExampleBench.doSumShiftedLoop               1024         1000000000  thrpt    5   8.244 ± 0.325  ops/s
+VectorizationExampleBench.doSumShiftedLoop              16384         1000000000  thrpt    5   7.866 ± 0.602  ops/s
+VectorizationExampleBench.doSumShiftedLoop              65536         1000000000  thrpt    5   7.914 ± 0.732  ops/s
+VectorizationExampleBench.doSumShiftedLoop             524288         1000000000  thrpt    5   6.322 ± 0.317  ops/s
+VectorizationExampleBench.doSumShiftedLoop           67108864         1000000000  thrpt    5   1.907 ± 0.049  ops/s
 ```
 
 With OpenJDK 8u162:
 ```
-Benchmark                                         (arraySize)  (loopCount)   Mode  Cnt  Score   Error  Units
-VectorizationExampleBench.doAddArraysIfEven             65536        10000  thrpt    5  1.917 ± 0.004  ops/s
-VectorizationExampleBench.doAddArraysIfPredicate        65536        10000  thrpt    5  2.206 ± 0.027  ops/s
-VectorizationExampleBench.doAddX                        65536        10000  thrpt    5  8.538 ± 0.322  ops/s
-VectorizationExampleBench.doSumIfEvenLoop               65536        10000  thrpt    5  1.290 ± 0.001  ops/s
-VectorizationExampleBench.doSumIfPredicateLoop          65536        10000  thrpt    5  2.855 ± 1.153  ops/s
-VectorizationExampleBench.doSumLoop                     65536        10000  thrpt    5  3.492 ± 0.022  ops/s
-VectorizationExampleBench.doSumShiftedLoop              65536        10000  thrpt    5  1.621 ± 0.071  ops/s
+Benchmark                                         (arraySize)  (elementsPerLoop)   Mode  Cnt   Score    Error  Units
+VectorizationExampleBench.doAddArraysIfEven              1024         1000000000  thrpt    5   1.232 ±  0.002  ops/s
+VectorizationExampleBench.doAddArraysIfEven             16384         1000000000  thrpt    5   1.257 ±  0.001  ops/s
+VectorizationExampleBench.doAddArraysIfEven             65536         1000000000  thrpt    5   1.257 ±  0.005  ops/s
+VectorizationExampleBench.doAddArraysIfEven            524288         1000000000  thrpt    5   1.257 ±  0.002  ops/s
+VectorizationExampleBench.doAddArraysIfEven          67108864         1000000000  thrpt    5   0.938 ±  0.375  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate         1024         1000000000  thrpt    5   1.561 ±  0.003  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        16384         1000000000  thrpt    5   1.527 ±  0.002  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        65536         1000000000  thrpt    5   1.381 ±  0.438  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate       524288         1000000000  thrpt    5   1.438 ±  0.001  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate     67108864         1000000000  thrpt    5   0.945 ±  0.002  ops/s
+VectorizationExampleBench.doAddX                         1024         1000000000  thrpt    5  10.066 ±  0.048  ops/s
+VectorizationExampleBench.doAddX                        16384         1000000000  thrpt    5   5.599 ±  0.209  ops/s
+VectorizationExampleBench.doAddX                        65536         1000000000  thrpt    5   5.610 ±  0.038  ops/s
+VectorizationExampleBench.doAddX                       524288         1000000000  thrpt    5   4.312 ±  0.004  ops/s
+VectorizationExampleBench.doAddX                     67108864         1000000000  thrpt    5   1.928 ±  0.004  ops/s
+VectorizationExampleBench.doSumIfEvenLoop                1024         1000000000  thrpt    5   0.848 ±  0.001  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               16384         1000000000  thrpt    5   0.844 ±  0.003  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               65536         1000000000  thrpt    5   0.843 ±  0.001  ops/s
+VectorizationExampleBench.doSumIfEvenLoop              524288         1000000000  thrpt    5   0.842 ±  0.003  ops/s
+VectorizationExampleBench.doSumIfEvenLoop            67108864         1000000000  thrpt    5   0.812 ±  0.105  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop           1024         1000000000  thrpt    5   2.029 ±  0.004  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          16384         1000000000  thrpt    5   2.104 ±  0.023  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          65536         1000000000  thrpt    5   2.093 ±  0.003  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop         524288         1000000000  thrpt    5   2.095 ±  0.067  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop       67108864         1000000000  thrpt    5   1.734 ±  0.089  ops/s
+VectorizationExampleBench.doSumLoop                      1024         1000000000  thrpt    5   2.283 ±  0.013  ops/s
+VectorizationExampleBench.doSumLoop                     16384         1000000000  thrpt    5   2.284 ±  0.003  ops/s
+VectorizationExampleBench.doSumLoop                     65536         1000000000  thrpt    5   2.287 ±  0.004  ops/s
+VectorizationExampleBench.doSumLoop                    524288         1000000000  thrpt    5   2.286 ±  0.016  ops/s
+VectorizationExampleBench.doSumLoop                  67108864         1000000000  thrpt    5   1.861 ±  0.471  ops/s
+VectorizationExampleBench.doSumShiftedLoop               1024         1000000000  thrpt    5   1.059 ±  0.001  ops/s
+VectorizationExampleBench.doSumShiftedLoop              16384         1000000000  thrpt    5   1.076 ±  0.002  ops/s
+VectorizationExampleBench.doSumShiftedLoop              65536         1000000000  thrpt    5   1.075 ±  0.008  ops/s
+VectorizationExampleBench.doSumShiftedLoop             524288         1000000000  thrpt    5   1.074 ±  0.018  ops/s
+VectorizationExampleBench.doSumShiftedLoop           67108864         1000000000  thrpt    5   1.033 ±  0.003  ops/s
 ```
 
 When run on a Skylake 4116 CPU @ 2.10GHz, I observe the following results:
 With Zing 18.06:
 
 ```
-Benchmark                                         (arraySize)  (loopCount)   Mode  Cnt   Score   Error  Units
-VectorizationExampleBench.doAddArraysIfEven             65536        10000  thrpt    5   8.591 ± 0.169  ops/s
-VectorizationExampleBench.doAddArraysIfPredicate        65536        10000  thrpt    5   7.753 ± 0.014  ops/s
-VectorizationExampleBench.doAddX                        65536        10000  thrpt    5  14.120 ± 0.113  ops/s
-VectorizationExampleBench.doSumIfEvenLoop               65536        10000  thrpt    5  20.057 ± 0.103  ops/s
-VectorizationExampleBench.doSumIfPredicateLoop          65536        10000  thrpt    5  16.016 ± 0.123  ops/s
-VectorizationExampleBench.doSumLoop                     65536        10000  thrpt    5  20.462 ± 0.231  ops/s
-VectorizationExampleBench.doSumShiftedLoop              65536        10000  thrpt    5  20.060 ± 0.084  ops/s
+Benchmark                                         (arraySize)  (elementsPerLoop)   Mode  Cnt   Score   Error  Units
+VectorizationExampleBench.doAddArraysIfEven              1024         1000000000  thrpt    5  11.143 ± 0.011  ops/s
+VectorizationExampleBench.doAddArraysIfEven             16384         1000000000  thrpt    5   5.676 ± 0.057  ops/s
+VectorizationExampleBench.doAddArraysIfEven             65536         1000000000  thrpt    5   5.714 ± 0.016  ops/s
+VectorizationExampleBench.doAddArraysIfEven            524288         1000000000  thrpt    5   2.518 ± 0.037  ops/s
+VectorizationExampleBench.doAddArraysIfEven          67108864         1000000000  thrpt    5   1.167 ± 0.050  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate         1024         1000000000  thrpt    5   9.392 ± 0.024  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        16384         1000000000  thrpt    5   5.058 ± 0.025  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        65536         1000000000  thrpt    5   5.077 ± 0.008  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate       524288         1000000000  thrpt    5   2.245 ± 0.004  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate     67108864         1000000000  thrpt    5   1.051 ± 0.046  ops/s
+VectorizationExampleBench.doAddX                         1024         1000000000  thrpt    5  13.973 ± 0.026  ops/s
+VectorizationExampleBench.doAddX                        16384         1000000000  thrpt    5   9.097 ± 0.210  ops/s
+VectorizationExampleBench.doAddX                        65536         1000000000  thrpt    5   9.210 ± 0.195  ops/s
+VectorizationExampleBench.doAddX                       524288         1000000000  thrpt    5   4.853 ± 0.014  ops/s
+VectorizationExampleBench.doAddX                     67108864         1000000000  thrpt    5   2.141 ± 0.040  ops/s
+VectorizationExampleBench.doSumIfEvenLoop                1024         1000000000  thrpt    5  18.309 ± 0.496  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               16384         1000000000  thrpt    5  12.977 ± 0.051  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               65536         1000000000  thrpt    5  13.132 ± 0.080  ops/s
+VectorizationExampleBench.doSumIfEvenLoop              524288         1000000000  thrpt    5   5.370 ± 0.009  ops/s
+VectorizationExampleBench.doSumIfEvenLoop            67108864         1000000000  thrpt    5   2.345 ± 0.009  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop           1024         1000000000  thrpt    5  14.385 ± 0.299  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          16384         1000000000  thrpt    5  10.385 ± 0.298  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          65536         1000000000  thrpt    5  10.487 ± 0.211  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop         524288         1000000000  thrpt    5   4.071 ± 0.008  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop       67108864         1000000000  thrpt    5   1.984 ± 0.037  ops/s
+VectorizationExampleBench.doSumLoop                      1024         1000000000  thrpt    5  26.082 ± 0.048  ops/s
+VectorizationExampleBench.doSumLoop                     16384         1000000000  thrpt    5  13.129 ± 0.577  ops/s
+VectorizationExampleBench.doSumLoop                     65536         1000000000  thrpt    5  13.378 ± 0.103  ops/s
+VectorizationExampleBench.doSumLoop                    524288         1000000000  thrpt    5   6.131 ± 2.387  ops/s
+VectorizationExampleBench.doSumLoop                  67108864         1000000000  thrpt    5   2.379 ± 0.010  ops/s
+VectorizationExampleBench.doSumShiftedLoop               1024         1000000000  thrpt    5  18.493 ± 0.055  ops/s
+VectorizationExampleBench.doSumShiftedLoop              16384         1000000000  thrpt    5  12.969 ± 0.048  ops/s
+VectorizationExampleBench.doSumShiftedLoop              65536         1000000000  thrpt    5  13.147 ± 0.037  ops/s
+VectorizationExampleBench.doSumShiftedLoop             524288         1000000000  thrpt    5   5.027 ± 0.011  ops/s
+VectorizationExampleBench.doSumShiftedLoop           67108864         1000000000  thrpt    5   2.352 ± 0.062  ops/s
 ```
 
 With OpenJDK 8u162:
 ```
-Benchmark                                         (arraySize)  (loopCount)   Mode  Cnt   Score   Error  Units
-VectorizationExampleBench.doAddArraysIfEven             65536        10000  thrpt    5   2.292 ± 0.008  ops/s
-VectorizationExampleBench.doAddArraysIfPredicate        65536        10000  thrpt    5   2.485 ± 0.025  ops/s
-VectorizationExampleBench.doAddX                        65536        10000  thrpt    5  14.727 ± 0.448  ops/s
-VectorizationExampleBench.doSumIfEvenLoop               65536        10000  thrpt    5   1.590 ± 0.005  ops/s
-VectorizationExampleBench.doSumIfPredicateLoop          65536        10000  thrpt    5   2.528 ± 0.156  ops/s
-VectorizationExampleBench.doSumLoop                     65536        10000  thrpt    5   3.181 ± 0.013  ops/s
-VectorizationExampleBench.doSumShiftedLoop              65536        10000  thrpt    5   1.731 ± 0.012  ops/s
+Benchmark                                         (arraySize)  (elementsPerLoop)   Mode  Cnt   Score    Error  Units
+VectorizationExampleBench.doAddArraysIfEven              1024         1000000000  thrpt    5   1.468 ±  0.019  ops/s
+VectorizationExampleBench.doAddArraysIfEven             16384         1000000000  thrpt    5   1.510 ±  0.006  ops/s
+VectorizationExampleBench.doAddArraysIfEven             65536         1000000000  thrpt    5   1.508 ±  0.005  ops/s
+VectorizationExampleBench.doAddArraysIfEven            524288         1000000000  thrpt    5   1.498 ±  0.004  ops/s
+VectorizationExampleBench.doAddArraysIfEven          67108864         1000000000  thrpt    5   1.062 ±  0.095  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate         1024         1000000000  thrpt    5   1.494 ±  0.048  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        16384         1000000000  thrpt    5   1.565 ±  0.032  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate        65536         1000000000  thrpt    5   1.572 ±  0.018  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate       524288         1000000000  thrpt    5   1.449 ±  0.024  ops/s
+VectorizationExampleBench.doAddArraysIfPredicate     67108864         1000000000  thrpt    5   1.013 ±  0.083  ops/s
+VectorizationExampleBench.doAddX                         1024         1000000000  thrpt    5  10.035 ±  0.026  ops/s
+VectorizationExampleBench.doAddX                        16384         1000000000  thrpt    5   9.533 ±  0.080  ops/s
+VectorizationExampleBench.doAddX                        65536         1000000000  thrpt    5   9.751 ±  0.074  ops/s
+VectorizationExampleBench.doAddX                       524288         1000000000  thrpt    5   4.939 ±  0.067  ops/s
+VectorizationExampleBench.doAddX                     67108864         1000000000  thrpt    5   2.311 ±  0.197  ops/s
+VectorizationExampleBench.doSumIfEvenLoop                1024         1000000000  thrpt    5   1.044 ±  0.001  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               16384         1000000000  thrpt    5   1.043 ±  0.001  ops/s
+VectorizationExampleBench.doSumIfEvenLoop               65536         1000000000  thrpt    5   1.041 ±  0.016  ops/s
+VectorizationExampleBench.doSumIfEvenLoop              524288         1000000000  thrpt    5   1.034 ±  0.010  ops/s
+VectorizationExampleBench.doSumIfEvenLoop            67108864         1000000000  thrpt    5   0.998 ±  0.017  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop           1024         1000000000  thrpt    5   1.615 ±  0.001  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          16384         1000000000  thrpt    5   1.666 ±  0.002  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop          65536         1000000000  thrpt    5   1.668 ±  0.008  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop         524288         1000000000  thrpt    5   1.751 ±  0.060  ops/s
+VectorizationExampleBench.doSumIfPredicateLoop       67108864         1000000000  thrpt    5   1.420 ±  0.087  ops/s
+VectorizationExampleBench.doSumLoop                      1024         1000000000  thrpt    5   2.102 ±  0.009  ops/s
+VectorizationExampleBench.doSumLoop                     16384         1000000000  thrpt    5   2.085 ±  0.002  ops/s
+VectorizationExampleBench.doSumLoop                     65536         1000000000  thrpt    5   2.087 ±  0.002  ops/s
+VectorizationExampleBench.doSumLoop                    524288         1000000000  thrpt    5   2.081 ±  0.007  ops/s
+VectorizationExampleBench.doSumLoop                  67108864         1000000000  thrpt    5   1.714 ±  0.159  ops/s
+VectorizationExampleBench.doSumShiftedLoop               1024         1000000000  thrpt    5   1.114 ±  0.029  ops/s
+VectorizationExampleBench.doSumShiftedLoop              16384         1000000000  thrpt    5   1.132 ±  0.009  ops/s
+VectorizationExampleBench.doSumShiftedLoop              65536         1000000000  thrpt    5   1.134 ±  0.003  ops/s
+VectorizationExampleBench.doSumShiftedLoop             524288         1000000000  thrpt    5   1.131 ±  0.001  ops/s
+VectorizationExampleBench.doSumShiftedLoop           67108864         1000000000  thrpt    5   1.051 ±  0.045  ops/s
 ```
 
 When running with Zing, the following jvm flags are useful for getting assembly output via Zvision:
