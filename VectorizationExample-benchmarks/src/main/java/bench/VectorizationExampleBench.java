@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 public class VectorizationExampleBench {
 
-    @Param({"65536"})
+    @Param({"1024", "16384", "65536", "524288"})
     int arraySize;
 
     @Param({"10000"})
