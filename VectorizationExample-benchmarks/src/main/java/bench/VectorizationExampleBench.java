@@ -28,11 +28,11 @@ import java.util.concurrent.TimeUnit;
 
 public class VectorizationExampleBench {
 
-    @Param({"1024", "16384", "65536", "524288"})
+    @Param({"1024", "16384", "65536", "524288", "67108864"})
     int arraySize;
 
-    @Param({"10000"})
-    int loopCount;
+    @Param({"1000000000"})
+    int elementsPerLoop;
 
     int[] sumLoopArray;
     int[] addXArray;
@@ -136,28 +136,28 @@ public class VectorizationExampleBench {
 
     @Benchmark
     public void doSumLoop() {
-        for (int i = 0; i < loopCount; i++) {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
             sum += sumLoop(sumLoopArray);
         }
     }
 
     @Benchmark
     public void doSumIfEvenLoop() {
-        for (int i = 0; i < loopCount; i++) {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
             sum += sumIfEvenLoop(sumLoopArray);
         }
     }
 
     @Benchmark
     public void doSumIfPredicateLoop() {
-        for (int i = 0; i < loopCount; i++) {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
             sum += sumIfPredicate(sumLoopArray);
         }
     }
 
     @Benchmark
     public void doSumShiftedLoop() {
-        for (int i = 0; i < loopCount; i++) {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
             sum += sumShifted(3, 0x7f, sumLoopArray);
         }
     }
@@ -165,7 +165,7 @@ public class VectorizationExampleBench {
     @Benchmark
     public void doAddX() {
         sum = 0;
-        for (int i = 0; i < loopCount; i++) {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
             addXtoArray(i, addXArray);
         }
         sum = sumLoop(addXArray);
@@ -174,7 +174,7 @@ public class VectorizationExampleBench {
     @Benchmark
     public void doAddArraysIfEven() {
         sum = 0;
-        for (int i = 0; i < loopCount; i++) {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
             addArraysIfEven(addArraysIfEvenArrayA, addArraysIfEvenArrayB);
         }
         sum = sumLoop(addArraysIfEvenArrayA);
@@ -183,7 +183,7 @@ public class VectorizationExampleBench {
     @Benchmark
     public void doAddArraysIfPredicate() {
         sum = 0;
-        for (int i = 0; i < loopCount; i++) {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
             addArraysIfPredicate(addArraysIfEvenArrayA, addArraysIfEvenArrayB);
         }
         sum = sumLoop(addArraysIfEvenArrayA);
