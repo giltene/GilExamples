@@ -92,9 +92,7 @@ public class VectorizableMixBench {
     public void doMixLoop() {
         for (int i = 0; i < elementsPerLoop; i += arraySize) {
             sum += scalarLoop(sumLoopArray.length);
-            if ((i & 0x3ff) == 0) {
-                sum += vectorizableLoop(sumLoopArray);
-            }
+            sum += vectorizableLoop(sumLoopArray);
         }
     }
 
