@@ -69,7 +69,7 @@ public class VectorizableMixBench {
     private int scalarLoop(int count) {
         int sum = 0;
         for (int i = 0; i < count; i++) {
-            sum += i + ((i -3) & 0x7);  // For now, no JIT I know of optimizes this away or vectorizes it.
+            sum += i + ((i -3) & sum);  // For now, no JIT I know of optimizes this away or vectorizes it.
         }
         return sum;
     }
@@ -85,6 +85,16 @@ public class VectorizableMixBench {
     public void doScalarLoop() {
         for (int i = 0; i < elementsPerLoop; i += arraySize) {
             sum += scalarLoop(sumLoopArray.length);
+        }
+    }
+
+    @Benchmark
+    public void doMixLoop() {
+        for (int i = 0; i < elementsPerLoop; i += arraySize) {
+            sum += scalarLoop(sumLoopArray.length);
+            if ((i & 0x3ff) == 0) {
+                sum += vectorizableLoop(sumLoopArray);
+            }
         }
     }
 
