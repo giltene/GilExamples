@@ -7,7 +7,7 @@ public class ExtendedWeakReference<T> extends WeakReference {
      *
      * @return True if the reference is cleared. False otherwise.
      */
-    boolean isCleared()
+    public boolean isCleared()
     {
         return this.get() == null;
     }
@@ -18,7 +18,7 @@ public class ExtendedWeakReference<T> extends WeakReference {
      * @param o The object to which this Reference may or may not be referring
      * @return True if this Reference's referent is o. False otherwise.
      */
-    boolean isReferringTo(final T o)
+    public boolean isReferringTo(final T o)
     {
         return this.get() == o;
     }
