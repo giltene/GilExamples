@@ -13,6 +13,8 @@ public class Spinners extends Thread {
         public int concurrencyLevel = 1;
         public long runTimeMs = 0;
         public boolean helpRequested = false;
+        public double dutyCyclerFraction = 1.0;
+        public long dutyCyclerPeriodMsec = 1000;
 
         public SpinnersConfiguration(final String[] args) {
             try {
@@ -21,6 +23,10 @@ public class Spinners extends Thread {
                         concurrencyLevel = Integer.parseInt(args[++i]);
                     } else if (args[i].equals("-t")) {
                         runTimeMs = Long.parseLong(args[++i]);
+                    } else if (args[i].equals("-d")) {
+                        dutyCyclerFraction = Double.parseDouble(args[++i]);
+                    } else if (args[i].equals("-p")) {
+                        dutyCyclerPeriodMsec = Long.parseLong(args[++i]);
                     } else if (args[i].equals("-h")) {
                         helpRequested = true;
                         throw new Exception("[Help]");
@@ -51,6 +57,8 @@ public class Spinners extends Thread {
                         " [-h]                      help\n" +
                         " [-c concurrencyLevel]     Concurrency level (number of spinner threads [default: 1]\n" +
                         " [-t runTimeMs]            Limit run time [default: 0, for infinite]\n" +
+                        " [-d dutyCyclerFraction]   Duty cycler fraction [default: 1.0, for non-stop]\n" +
+                        " [-p dutyCyclerPeriodMs]   Duty cycler period[default: 1000]\n" +
                         "\n");
 
                 System.exit(helpRequested ? 0 : 1);
@@ -58,17 +66,62 @@ public class Spinners extends Thread {
         }
     }
 
-    protected static class SpinnerThread extends Thread {
+    static class SpinnerThread extends Thread {
         static volatile long count = 0;
+        final DutyCycler dutyCycler;
 
-        SpinnerThread() {
+        SpinnerThread(DutyCycler dutyCycler) {
+            this.dutyCycler = dutyCycler;
             this.setDaemon(true);
         }
 
         @Override
         public void run() {
             while (true) {
-                count++;
+
+                try {
+                    if (dutyCycler.sleepNow) {
+                        Thread.sleep(1);
+                    }
+                    count++;
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        }
+    }
+
+    static class DutyCycler extends Thread {
+        volatile boolean sleepNow = false;
+        private final long msecInSleep;
+        private final long msecInWake;
+
+        DutyCycler(double dutyCycleFraction, long periodInMsec) {
+            if ((dutyCycleFraction > 1.0) || (dutyCycleFraction < 0.0)) {
+                throw new IllegalArgumentException("dutyCycleFraction must be between 0.0 and 1.0");
+            }
+            if (periodInMsec < 10) {
+                throw new IllegalArgumentException("periodInMsec must be >= 10");
+            }
+            msecInWake = (long)Math.ceil(dutyCycleFraction * periodInMsec);
+            msecInSleep = (long)Math.floor((1.0 - dutyCycleFraction) * periodInMsec);
+
+            this.setDaemon(true);
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    sleepNow = false;
+                    Thread.sleep(msecInWake);
+                    if (msecInSleep > 0) {
+                        sleepNow = true;
+                        Thread.sleep(msecInSleep);
+                    }
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
         }
     }
@@ -82,10 +135,14 @@ public class Spinners extends Thread {
     public void run() {
         long startTimeMsec = System.currentTimeMillis();
         try {
+            // Create and start duty cycler:
+            DutyCycler dutyCycler = new DutyCycler(config.dutyCyclerFraction,  config.dutyCyclerPeriodMsec);
+            dutyCycler.start();
+
             // Create and start allocators:
             SpinnerThread[] allocators = new SpinnerThread[config.concurrencyLevel];
             for (int i = 0; i < config.concurrencyLevel; i++) {
-                allocators[i] = new SpinnerThread();
+                allocators[i] = new SpinnerThread(dutyCycler);
                 allocators[i].start();
             }
 
