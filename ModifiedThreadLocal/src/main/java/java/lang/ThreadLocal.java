@@ -102,13 +102,12 @@ public class ThreadLocal<T> {
     private static final int HASH_INCREMENT = 0x61c88647;
     
     /**
-     * For Zing, each ThreadLocal is given a unique Long identifier,
-     * It relies on the 64 bit identity long not overflowing, but
-     * even if ThreadLocals were created as fast as possible, and even 
+     * Each ThreadLocal is given a unique Long identifier. It relies on the 64 bit identity long
+     * not overflowing, but even if ThreadLocals were created as fast as possible, and even
      * if AtomicLong.getAndIncrement() took only 1/4 of a nanosecond, it would take 136 
      * years for an overflow to happen and for an identity long to repeat.
-     * the need for this is we would want to reduce the usage
-     * of ThreadLocalMap.Entry.get() as much as possible. Instead of comparing key versus
+     * We use this identity to eliminate the use of ThreadLocalMap.Entry.get()
+     * for not-actually-matching entries. Instead of comparing key versus
      * Entry.get() we compare the threadLocalIdentity with cached threadLocalIdentity in Entry
      * for equality test.
      */
