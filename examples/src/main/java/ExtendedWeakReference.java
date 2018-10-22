@@ -7,7 +7,7 @@ public class ExtendedWeakReference<T> extends WeakReference {
      *
      * @return True if get() would return null. False otherwise.
      */
-    public boolean isNull()
+    public boolean isCleared()
     {
         return this.get() == null;
     }
