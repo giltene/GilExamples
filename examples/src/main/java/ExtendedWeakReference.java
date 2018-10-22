@@ -1,7 +1,13 @@
 import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 
 public class ExtendedWeakReference<T> extends WeakReference {
+
+    public ExtendedWeakReference(T referent) { super(referent); }
+
+    public ExtendedWeakReference(T referent, ReferenceQueue<? super T> q) { super(referent, q); }
+
     /**
      * Indicate whether this Reference's get() would return null.
      *
