@@ -77,6 +77,11 @@ public class MultiplyVariantsBench {
     }
 
     @Benchmark
+    public void multiplySelfNoOverlapWithGap() {
+        multiply(accum, loopLength*2, accum, 0, loopLength);
+    }
+
+    @Benchmark
     public void multiplySelfPartialOverlapSrcLagging() {
         multiply(accum, loopLength/2, accum, 0, loopLength);
     }
@@ -159,6 +164,11 @@ public class MultiplyVariantsBench {
     @Benchmark
     public void multiplySelfNoOverlapStatic() {
         multiply(staticAccum, loopLength, staticAccum, 0, loopLength);
+    }
+
+    @Benchmark
+    public void multiplySelfNoOverlapStaticWithGap() {
+        multiply(staticAccum, loopLength*2, staticAccum, 0, loopLength);
     }
 
     @Benchmark
