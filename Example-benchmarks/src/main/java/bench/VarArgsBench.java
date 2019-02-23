@@ -28,35 +28,24 @@ import java.util.concurrent.TimeUnit;
 
 public class VarArgsBench {
 
-    long loopCount = 10000;
+    static final long loopCount = 10000;
 
-    int sum1, sum2, sum3, sum4;
+    int sum1, sum2, sum3;
+    int staticSum1, staticSum2, staticSum3;
 
-    long calc3(int a, int b, int c) {
+    int calc3(int a, int b, int c) {
         return a + b + c;
     }
 
-    long calc3va(final Object... args) {
+    int calc3va(final Object... args) {
         int a = (Integer) args[0];
         int b = (Integer) args[1];
         int c = (Integer) args[2];
         return a + b + c;
     }
 
-    long calc4(int a, int b, int c, int d) {
-        return a + b + c + d;
-    }
-
-    long calc4va(final Object... args) {
-        int a = (Integer) args[0];
-        int b = (Integer) args[1];
-        int c = (Integer) args[2];
-        int d = (Integer) args[3];
-        return a + b + c + d;
-    }
-
-    long calcVa(final Object... args) {
-        long val = 0;
+    int calcVa(final Object... args) {
+        int val = 0;
         for (Object o : args) {
             val += (Integer) o;
         }
@@ -75,11 +64,28 @@ public class VarArgsBench {
         }
     }
 
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    @Benchmark
+    public void varArgsBench3StaticSums() {
+        for (int i = 0; i < loopCount; i++) {
+            sum1 += calc3(staticSum1, staticSum2, staticSum3);
+        }
+    }
+
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void varArgsBench3va() {
         for (int i = 0; i < loopCount; i++) {
             sum1 += calc3va(sum1, sum2, sum3);
+        }
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    @Benchmark
+    public void varArgsBench3vaStaticSums() {
+        for (int i = 0; i < loopCount; i++) {
+            sum1 += calc3va(staticSum1, staticSum2, staticSum3);
         }
     }
 
@@ -91,12 +97,23 @@ public class VarArgsBench {
         }
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    @Benchmark
+    public void varArgsBench3GenericVaStaticSums() {
+        for (int i = 0; i < loopCount; i++) {
+            sum1 += calcVa(staticSum1, staticSum2, staticSum3);
+        }
+    }
+
     @Benchmark
     public void allVarArgs() {
         for (long i = 0; i < 10000000000000L; i++) {
             varArgsBench3();
+            varArgsBench3StaticSums();
             varArgsBench3va();
+            varArgsBench3vaStaticSums();
             varArgsBench3GenericVa();
+            varArgsBench3GenericVaStaticSums();
         }
     }
 }
