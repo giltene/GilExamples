@@ -31,7 +31,6 @@ public class VarArgsBench {
     static final long loopCount = 10000;
 
     int sum1, sum2, sum3;
-    int staticSum1, staticSum2, staticSum3;
 
     int calc3(int a, int b, int c) {
         return a + b + c;
@@ -64,15 +63,6 @@ public class VarArgsBench {
         }
     }
 
-
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    @Benchmark
-    public void varArgsBench3StaticSums() {
-        for (int i = 0; i < loopCount; i++) {
-            sum1 += calc3(staticSum1, staticSum2, staticSum3);
-        }
-    }
-
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void varArgsBench3va() {
@@ -83,9 +73,10 @@ public class VarArgsBench {
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
-    public void varArgsBench3vaStaticSums() {
+    public void varArgsBench3va_tweak() {
         for (int i = 0; i < loopCount; i++) {
-            sum1 += calc3va(staticSum1, staticSum2, staticSum3);
+            sum1 += calc3va(sum1, sum2, sum3);
+            sum2 = sum3 = sum1;
         }
     }
 
@@ -97,23 +88,13 @@ public class VarArgsBench {
         }
     }
 
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    @Benchmark
-    public void varArgsBench3GenericVaStaticSums() {
-        for (int i = 0; i < loopCount; i++) {
-            sum1 += calcVa(staticSum1, staticSum2, staticSum3);
-        }
-    }
-
     @Benchmark
     public void allVarArgs() {
         for (long i = 0; i < 10000000000000L; i++) {
             varArgsBench3();
-            varArgsBench3StaticSums();
             varArgsBench3va();
-            varArgsBench3vaStaticSums();
+            varArgsBench3va_tweak();
             varArgsBench3GenericVa();
-            varArgsBench3GenericVaStaticSums();
         }
     }
 }
