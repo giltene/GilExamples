@@ -148,7 +148,7 @@ public class FinalArraySumBench {
     }
 
     @Benchmark
-    public void sum1() {
+    public void sum1Final() {
         sum += buffer.bufSum1();
     }
 
@@ -158,7 +158,7 @@ public class FinalArraySumBench {
     }
 
     @Benchmark
-    public void sum2() {
+    public void sum2Final() {
         sum += buffer.bufSum2();
     }
 
@@ -168,7 +168,7 @@ public class FinalArraySumBench {
     }
 
     @Benchmark
-    public void sum3() {
+    public void sum3Final() {
         sum += buffer.bufSum3();
     }
 
@@ -178,7 +178,7 @@ public class FinalArraySumBench {
     }
 
     @Benchmark
-    public void sum4() {
+    public void sum4Final() {
         sum += buffer.bufSum4();
     }
 
@@ -188,7 +188,7 @@ public class FinalArraySumBench {
     }
 
     @Benchmark
-    public void sum5() {
+    public void sum5Final() {
         sum += buffer.bufSum5();
     }
 
