@@ -32,7 +32,9 @@ public class EnumBench {
 
     int arrayLength;
 
-    Number[] array;
+    Number[] numbers;
+    City[] cities;
+
 
     int sum = 0;
 
@@ -54,27 +56,44 @@ public class EnumBench {
         throw new IllegalStateException("An unexpected enum value is being looked up.");
     }
 
+    static enum City {
+        LOS_ANGELES, SAN_FRANCISCO, SEATTLE, NEW_YORK, ATLANTA, BOSTON;
+    }
+
+    boolean isOnEastCoast(City city) {
+        switch (city) {
+        case LOS_ANGELES:
+        case SAN_FRANCISCO:
+        case SEATTLE:
+            return false;
+        default:
+            return true;
+        }
+    }
+
     @Setup
     public void setup() {
         arrayLength = arrayLengthInKs * 1024;
-        array = new Number[arrayLength];
+        numbers = new Number[arrayLength];
+        cities = new City[arrayLength];
 
         for (int i = 0; i < arrayLength; i++) {
-            array[i] = Number.ONE;
+            numbers[i] = Number.ONE;
+            cities[i] = City.BOSTON;
         }
     }
 
     @Benchmark
     public void sumEnums() {
         for (int i = 0; i < arrayLength; i++) {
-            sum += numberToInt(array[i]);
+            sum += numberToInt(numbers[i]);
         }
     }
 
     @Benchmark
     public void sumVolatileEnums() {
         for (int i = 0; i < arrayLength; i++) {
-            sum += numberToInt(array[i]) + volatileNum;
+            sum += numberToInt(numbers[i]) + volatileNum;
         }
     }
 
@@ -89,6 +108,20 @@ public class EnumBench {
     public void sumConstantVolatileEnum() {
         for (int i = 0; i < arrayLength; i++) {
             sum += numberToInt(Number.ONE) + volatileNum;
+        }
+    }
+
+    @Benchmark
+    public void sumEastCoastCities() {
+        for (int i = 0; i < arrayLength; i++) {
+            sum += isOnEastCoast(cities[i]) ? 1 : 0;
+        }
+    }
+
+    @Benchmark
+    public void sumConstantEastCoastCities() {
+        for (int i = 0; i < arrayLength; i++) {
+            sum += isOnEastCoast(City.BOSTON) ? 1 : 0;
         }
     }
 }
