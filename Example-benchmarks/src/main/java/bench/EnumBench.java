@@ -8,7 +8,6 @@
 package bench;
 
 import org.openjdk.jmh.annotations.*;
-
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -28,30 +27,31 @@ import java.util.concurrent.TimeUnit;
 
 public class EnumBench {
 
-    @Param({"1024", "2048", "4096"})
+    @Param({"8192"})
     int arrayLengthInKs;
 
     int arrayLength;
 
     Number[] array;
 
-    long sum;
+    int sum = 0;
+
+    volatile int volatileNum = 0;
 
     static enum Number {
-        ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX;
-        static final Number[] intToNumber = {ZERO, ONE, TWO, THREE, FOUR, FIVE};
+        MINUS_THREE, MINUS_ONE, ZERO, ONE, THREE, FOUR, SEVEN, NINE, TWENTY;
     }
 
     int numberToInt(Number number) {
         switch (number) {
         case ZERO: return 0;
         case ONE: return 1;
-        case TWO: return 2;
         case THREE: return 3;
         case FOUR: return 4;
-        case FIVE: return 5;
+        case SEVEN: return 7;
+        case NINE: return 9;
         }
-        throw new IllegalStateException("Should never see an enum value not covered by complete enum switch.");
+        throw new IllegalStateException("An unexpected enum value is being looked up.");
     }
 
     @Setup
@@ -60,7 +60,7 @@ public class EnumBench {
         array = new Number[arrayLength];
 
         for (int i = 0; i < arrayLength; i++) {
-            array[i] = Number.intToNumber[(i % 6)];
+            array[i] = Number.ONE;
         }
     }
 
@@ -72,9 +72,23 @@ public class EnumBench {
     }
 
     @Benchmark
+    public void sumVolatileEnums() {
+        for (int i = 0; i < arrayLength; i++) {
+            sum += numberToInt(array[i]) + volatileNum;
+        }
+    }
+
+    @Benchmark
     public void sumConstantEnum() {
         for (int i = 0; i < arrayLength; i++) {
             sum += numberToInt(Number.ONE);
+        }
+    }
+
+    @Benchmark
+    public void sumConstantVolatileEnum() {
+        for (int i = 0; i < arrayLength; i++) {
+            sum += numberToInt(Number.ONE) + volatileNum;
         }
     }
 }
