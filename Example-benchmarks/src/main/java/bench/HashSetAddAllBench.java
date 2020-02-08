@@ -26,14 +26,14 @@ import java.util.concurrent.TimeUnit;
   Run the profiling (Linux only):
      $ java -Djmh.perfasm.events=cycles,cache-misses -jar target/benchmarks.jar -f 1 -prof perfasm
  */
-@Warmup(iterations = 7, time = 1, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 9, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(3)
 @State(Scope.Thread)
 
 public class HashSetAddAllBench {
 
-    @Param({"1024"})
+    @Param({"128", "1024", "4096"})
     int hahSetSizeInK;
 
     int hashSetSize;
