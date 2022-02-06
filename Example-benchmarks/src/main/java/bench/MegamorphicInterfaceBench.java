@@ -134,7 +134,13 @@ public class MegamorphicInterfaceBench {
     static final Doer[] doerArray7 = new Doer[arrayLength];
     static final Doer[] doerArray8 = new Doer[arrayLength];
 
+    static final Doer[] doerArray2e = new Doer[arrayLength];
+    static final Doer[] doerArray3e = new Doer[arrayLength];
     static final Doer[] doerArray4e = new Doer[arrayLength];
+    static final Doer[] doerArray5e = new Doer[arrayLength];
+    static final Doer[] doerArray6e = new Doer[arrayLength];
+    static final Doer[] doerArray7e = new Doer[arrayLength];
+    static final Doer[] doerArray8e = new Doer[arrayLength];
 
     volatile long sum;
 
@@ -157,11 +163,20 @@ public class MegamorphicInterfaceBench {
         RandomCollection<Doer> rand8 =  new RandomCollection<>(rand7).
                 add(1000, new DoesH());
 
-        RandomCollection<Doer> rand4e = new RandomCollection<Doer>().
-                add(10, new DoesA()).
-                add(10, new DoesB()).
-                add(10, new DoesC()).
+        RandomCollection<Doer> rand2e = new RandomCollection<>(rand1).
+                add(10, new DoesB());
+        RandomCollection<Doer> rand3e = new RandomCollection<>(rand2e).
+                add(10, new DoesC());
+        RandomCollection<Doer> rand4e = new RandomCollection<>(rand3e).
                 add(10, new DoesD());
+        RandomCollection<Doer> rand5e = new RandomCollection<>(rand4e).
+                add(10, new DoesE());
+        RandomCollection<Doer> rand6e = new RandomCollection<>(rand5e).
+                add(10, new DoesF());
+        RandomCollection<Doer> rand7e = new RandomCollection<>(rand6e).
+                add(10, new DoesG());
+        RandomCollection<Doer> rand8e = new RandomCollection<>(rand7e).
+                add(10, new DoesH());
 
         for (int i = 0; i < arrayLength; i++) {
             doerArray1[i] = rand1.next();
@@ -173,7 +188,13 @@ public class MegamorphicInterfaceBench {
             doerArray7[i] = rand7.next();
             doerArray8[i] = rand8.next();
 
+            doerArray2e[i] = rand2e.next();
+            doerArray3e[i] = rand3e.next();
             doerArray4e[i] = rand4e.next();
+            doerArray5e[i] = rand5e.next();
+            doerArray6e[i] = rand6e.next();
+            doerArray7e[i] = rand7e.next();
+            doerArray8e[i] = rand8e.next();
 
         }
     }
@@ -197,8 +218,18 @@ public class MegamorphicInterfaceBench {
     }
 
     @Benchmark
+    public void b_bimorphicEqualDoers() {
+        sum += f(doerArray2e);
+    }
+
+    @Benchmark
     public void c_trimorphicDoers() {
         sum += f(doerArray3);
+    }
+
+    @Benchmark
+    public void c_trimorphicEqualDoers() {
+        sum += f(doerArray3e);
     }
 
     @Benchmark
@@ -217,8 +248,18 @@ public class MegamorphicInterfaceBench {
     }
 
     @Benchmark
+    public void e_pentamorphicEqualDoers() {
+        sum += f(doerArray5e);
+    }
+
+    @Benchmark
     public void f_hexamorphicDoers() {
         sum += f(doerArray6);
+    }
+
+    @Benchmark
+    public void f_hexamorphicEqualDoers() {
+        sum += f(doerArray6e);
     }
 
     @Benchmark
@@ -227,7 +268,17 @@ public class MegamorphicInterfaceBench {
     }
 
     @Benchmark
+    public void g_septamorphicEqualDoers() {
+        sum += f(doerArray7e);
+    }
+
+    @Benchmark
     public void h_octamorphicDoers() {
         sum += f(doerArray8);
+    }
+
+    @Benchmark
+    public void h_octamorphicEqualDoers() {
+        sum += f(doerArray8e);
     }
 }
