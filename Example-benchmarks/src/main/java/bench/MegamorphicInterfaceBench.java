@@ -134,6 +134,8 @@ public class MegamorphicInterfaceBench {
     static final Doer[] doerArray7 = new Doer[arrayLength];
     static final Doer[] doerArray8 = new Doer[arrayLength];
 
+    static final Doer[] doerArray4e = new Doer[arrayLength];
+
     volatile long sum;
 
     @Setup
@@ -155,6 +157,12 @@ public class MegamorphicInterfaceBench {
         RandomCollection<Doer> rand8 =  new RandomCollection<>(rand7).
                 add(1000, new DoesH());
 
+        RandomCollection<Doer> rand4e = new RandomCollection<Doer>().
+                add(10, new DoesA()).
+                add(10, new DoesB()).
+                add(10, new DoesC()).
+                add(10, new DoesD());
+
         for (int i = 0; i < arrayLength; i++) {
             doerArray1[i] = rand1.next();
             doerArray2[i] = rand2.next();
@@ -164,6 +172,9 @@ public class MegamorphicInterfaceBench {
             doerArray6[i] = rand6.next();
             doerArray7[i] = rand7.next();
             doerArray8[i] = rand8.next();
+
+            doerArray4e[i] = rand4e.next();
+
         }
     }
 
@@ -193,6 +204,11 @@ public class MegamorphicInterfaceBench {
     @Benchmark
     public void d_quadmorphicDoers() {
         sum += f(doerArray4);
+    }
+
+    @Benchmark
+    public void d_quadmorphicEqualDoers() {
+        sum += f(doerArray4e);
     }
 
     @Benchmark
