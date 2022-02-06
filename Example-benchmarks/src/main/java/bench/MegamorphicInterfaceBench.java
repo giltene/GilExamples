@@ -31,62 +31,62 @@ import java.util.concurrent.TimeUnit;
 public class MegamorphicInterfaceBench {
 
     public interface Doer {
-        public int doIt();
+        public int doIt(int offset);
     }
 
     public class DoesA implements Doer {
         static final int A = 111;
-        public int doIt() {
-            return A;
+        public int doIt(int offset) {
+            return A + offset;
         }
     }
 
     public class DoesB implements Doer {
         static final int B = 212;
-        public int doIt() {
-            return B;
+        public int doIt(int offset) {
+            return B + offset;
         }
     }
 
     public class DoesC implements Doer {
         static final int C = 313;
-        public int doIt() {
-            return C;
+        public int doIt(int offset) {
+            return C + offset;
         }
     }
 
     public class DoesD implements Doer {
         static final int D = 414;
-        public int doIt() {
-            return D;
+        public int doIt(int offset) {
+            return D + offset;
         }
     }
 
     public class DoesE implements Doer {
         static final int E = 515;
-        public int doIt() {
-            return E;
+        public int doIt(int offset) {
+            return E + offset;
         }
     }
 
     public class DoesF implements Doer {
         static final int F = 616;
-        public int doIt() {
-            return F;
+        public int doIt(int offset) {
+            return F + offset;
         }
     }
 
     public class DoesG implements Doer {
         static final int G = 717;
-        public int doIt() {
-            return G;
+        public int doIt(int offset) {
+            return G + offset;
         }
     }
 
     public class DoesH implements Doer {
         static final int H = 818;
-        public int doIt() {
-            return H;
+        public int doIt(int offset) {
+            return H + offset;
         }
     }
 
@@ -202,7 +202,7 @@ public class MegamorphicInterfaceBench {
     public int f(Doer[] b) {
         int sum = 0;
         for(int i = 0; i < b.length; i++) {
-            sum += b[i].doIt();
+            sum += b[i].doIt(1000);
         }
         return sum;
     }
