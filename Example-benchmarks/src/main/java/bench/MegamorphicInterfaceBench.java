@@ -202,7 +202,7 @@ public class MegamorphicInterfaceBench {
     public int f(Doer[] b) {
         int sum = 0;
         for(int i = 0; i < b.length; i++) {
-            sum += b[i].doIt(1000000);
+            sum += b[i].doIt(100000000 /* sqrt = 10000 */);
         }
         return sum;
     }
