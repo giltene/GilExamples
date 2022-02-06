@@ -35,56 +35,56 @@ public class MegamorphicInterfaceBench {
     }
 
     public class DoesA implements Doer {
-        static final int A = 173;
+        static final int A = 111;
         public int doIt() {
             return A;
         }
     }
 
     public class DoesB implements Doer {
-        static final int B = 177;
+        static final int B = 212;
         public int doIt() {
             return B;
         }
     }
 
     public class DoesC implements Doer {
-        static final int C = 191;
+        static final int C = 313;
         public int doIt() {
             return C;
         }
     }
 
     public class DoesD implements Doer {
-        static final int D = 197;
+        static final int D = 414;
         public int doIt() {
             return D;
         }
     }
 
     public class DoesE implements Doer {
-        static final int E = 142;
+        static final int E = 515;
         public int doIt() {
             return E;
         }
     }
 
     public class DoesF implements Doer {
-        static final int F = 135;
+        static final int F = 616;
         public int doIt() {
             return F;
         }
     }
 
     public class DoesG implements Doer {
-        static final int G = 126;
+        static final int G = 717;
         public int doIt() {
             return G;
         }
     }
 
     public class DoesH implements Doer {
-        static final int H = 123;
+        static final int H = 818;
         public int doIt() {
             return H;
         }
