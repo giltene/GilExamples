@@ -56,46 +56,136 @@ public class MultiplyVariantsBench {
     }
 
     public static void multiply(long[] accum, int accumOffset, long[] src, int srcOffset, int n){
+        if (accum.length != src.length) {
+            return;
+        }
         for (int ii = 0; ii < n; ++ii) {
             accum[ii + accumOffset] *= src[ii + srcOffset];
         }
     }
 
+    public static void multiplyA(long[] accum, int accumOffset, long[] src, int srcOffset, int n){
+        if (accum.length != src.length) {
+            return;
+        }
+        for (int ii = 0; ii < n; ++ii) {
+            accum[ii + accumOffset] *= src[ii + srcOffset];
+        }
+    }
+
+    public static void multiplyB(long[] accum, int accumOffset, long[] src, int srcOffset, int n){
+        for (int ii = 0; ii < n; ++ii) {
+            accum[ii + accumOffset] *= src[ii + srcOffset];
+        }
+    }
+
+    public static void multiplyC(long[] accum, int accumOffset, long[] src, int srcOffset, int n){
+        if (accum.length < accumOffset + n)
+            return;
+        if (src.length < srcOffset + n)
+            return;
+        for (int ii = 0; ii < n; ++ii) {
+            accum[ii + accumOffset] *= src[ii + srcOffset];
+        }
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    public static void multiplyArrays(long[] accum, long[] src, int n){
+        for (int ii = 0; ii < n; ++ii) {
+            accum[ii] *= src[ii];
+        }
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    public static void multiplyArraysA(long[] accum, long[] src, int n){
+        if (accum.length != src.length) {
+            return;
+        }
+        for (int ii = 0; ii < n; ++ii) {
+            accum[ii] *= src[ii];
+        }
+    }
+
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    private void addArrays(long a[], long b[], int n) {
+        for (int i = 0; i < n; i++) {
+                a[i] += b[i];
+        }
+    }
+
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    private void addArraysA(long a[], long b[], int n) {
+        if (a.length != b.length) {
+            return;
+        }
+        for (int i = 0; i < n; i++) {
+            a[i] += b[i];
+        }
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySeparate() {
         multiply(accum, 0, src, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    @Benchmark
+    public void multiplySeparateA() {
+        multiplyA(accum, 0, src, 0, loopLength);
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    @Benchmark
+    public void multiplySeparateB() {
+        multiplyB(accum, 0, src, 0, loopLength);
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    @Benchmark
+    public void multiplySeparateC() {
+        multiplyC(accum, 0, src, 0, loopLength);
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfCompleteOverlap() {
         multiply(accum, 0, accum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfNoOverlap() {
         multiply(accum, loopLength, accum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfNoOverlapWithGap() {
         multiply(accum, loopLength*2, accum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfPartialOverlapSrcLagging() {
         multiply(accum, loopLength/2, accum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfPartialOverlapSrcLeading() {
         multiply(accum, 0, accum, loopLength/2, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfPartialOverlapSrcLaggingStaticCount() {
         multiply(accum, staticLoopLength/2, accum, 0, staticLoopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfPartialOverlapSrcLeadingStaticCount() {
         multiply(accum, 0, accum, staticLoopLength/2, staticLoopLength);
@@ -151,33 +241,68 @@ public class MultiplyVariantsBench {
 //        multiply(accum, 0, accum, 128, loopLength);
 //    }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySeparateStatic() {
         multiply(staticAccum, 0, staticSrc, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfCompleteOverlapStatic() {
         multiply(staticAccum, 0, staticAccum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfNoOverlapStatic() {
         multiply(staticAccum, loopLength, staticAccum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfNoOverlapStaticWithGap() {
         multiply(staticAccum, loopLength*2, staticAccum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfPartialOverlapSrcLaggingStatic() {
         multiply(staticAccum, loopLength/2, staticAccum, 0, loopLength);
     }
 
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     @Benchmark
     public void multiplySelfPartialOverlapSrcLeadingStatic() {
         multiply(staticAccum, 0, staticAccum, loopLength/2, loopLength);
+    }
+
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    @Benchmark
+    public void multiplyAll() {
+        multiplySeparateC();
+        multiplySeparateB();
+        multiplySeparateA();
+        multiplySeparate();
+        addArrays(accum, src, loopLength);
+        addArraysA(accum, src, loopLength);
+        multiplyArrays(accum, src, loopLength);
+        multiplyArraysA(accum, src, loopLength);
+//        multiplySelfCompleteOverlap();
+//        multiplySelfNoOverlap();
+//        multiplySelfNoOverlapWithGap();
+//        multiplySelfPartialOverlapSrcLagging();
+//        multiplySelfPartialOverlapSrcLeading();
+//        multiplySelfPartialOverlapSrcLaggingStaticCount();
+//        multiplySelfPartialOverlapSrcLeadingStaticCount();
+//        multiplySeparateStatic();
+//        multiplySelfCompleteOverlapStatic();
+//        multiplySelfNoOverlapStatic();
+//        multiplySelfNoOverlapStaticWithGap();
+//        multiplySelfPartialOverlapSrcLaggingStatic();
+//        multiplySelfPartialOverlapSrcLeadingStatic();
+//        multiply(accum, src, loopLength);
+//        add(accum, src, loopLength);
+//        addArrays(accum, src, loopLength);
     }
 }

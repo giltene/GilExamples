@@ -53,6 +53,9 @@ public class VarArgsBench {
 
     @Setup
     public void setup() throws NoSuchMethodException {
+        sum1 = 1234567;
+        sum2 = 7654321;
+        sum3 = 9876543;
     }
 
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)

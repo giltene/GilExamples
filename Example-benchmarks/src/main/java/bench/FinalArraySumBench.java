@@ -33,7 +33,7 @@ public class FinalArraySumBench {
     int bufferLength;
 
     static volatile long baseVal = 0;
-
+    
     long sum = 0;
 
     static class MyBuffer {
@@ -134,6 +134,30 @@ public class FinalArraySumBench {
             }
             return sum;
         }
+
+        long bufSum6() {
+            long sum = 0;
+            long localBaseVal = baseVal;
+            for (int i = 0; i < buf.length; i++) {
+                if ((i & 0xf) == 0) {
+                    localBaseVal = baseVal;
+                }
+                sum += buf[i] + baseVal;
+            }
+            return sum;
+        }
+
+        long bufSum6NonFinal() {
+            long sum = 0;
+            long localBaseVal = baseVal;
+            for (int i = 0; i < nonFinalBuf.length; i++) {
+                if ((i & 0xf) == 0) {
+                    localBaseVal = baseVal;
+                }
+                sum += nonFinalBuf[i] + localBaseVal;
+            }
+            return sum;
+        }
     }
 
     MyBuffer buffer;
@@ -195,5 +219,15 @@ public class FinalArraySumBench {
     @Benchmark
     public void sum5NonFinal() {
         sum += buffer.bufSum5NonFinal();
+    }
+
+    @Benchmark
+    public void sum6Final() {
+        sum += buffer.bufSum6();
+    }
+
+    @Benchmark
+    public void sum6NonFinal() {
+        sum += buffer.bufSum6NonFinal();
     }
 }

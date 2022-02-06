@@ -9,8 +9,7 @@ package bench;
 
 import org.openjdk.jmh.annotations.*;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -37,8 +36,11 @@ public class GenericCheckcastBench {
 
     Object[] targetOs;
     String[] targetSs;
-    ArrayList<String> sList;
+    List<String> sList;
     ArrayList<String> sShuffledList;
+
+    Map<Integer, String> sMap;
+    HashMap<Integer, String> sMap2;
 
 
     int sum = 0;
@@ -59,6 +61,9 @@ public class GenericCheckcastBench {
             String s = String.format("s = %s", i);
             sList.add(s);
             sShuffledList.add(s);
+
+            sMap.put(i, s);
+            sMap2.put(i, s);
         }
 
         // Shuffle shuffled lists:
@@ -99,6 +104,32 @@ public class GenericCheckcastBench {
     public void xferShuffledStrings() {
         for (int i = 0; i < arrayLength; i++) {
             targetSs[i] = sShuffledList.get(i);
+        }
+    }
+
+    @Benchmark
+    public void sumStringLengths() {
+        for (int i = 0; i < arrayLength; i++) {
+            String s = sList.get(i);
+            sum += s.length();
+        }
+    }
+
+    @Benchmark
+    public void sumShuffledStringLengths() {
+        for (int i = 0; i < arrayLength; i++) {
+            String s = sShuffledList.get(i);
+            sum += s.length();
+        }
+    }
+
+    @Benchmark
+    public void sumLengths() {
+        for (int i = 0; i < arrayLength; i++) {
+            String s = sShuffledList.get(i);
+            String s2 = sMap.get(i);
+            String s3 = sMap2.get(i);
+            sum += s.length() + s2.length() + s3.length();
         }
     }
 }
