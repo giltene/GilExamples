@@ -200,7 +200,7 @@ public class MegamorphicInterfaceListsBench {
         }
     }
 
-    public int f(List<Doer> b) {
+    public static int f(List<Doer> b) {
         int sum = 0;
         for(Doer d : b ) {
             sum += d.doIt(100000000 /* sqrt = 10000 */);
