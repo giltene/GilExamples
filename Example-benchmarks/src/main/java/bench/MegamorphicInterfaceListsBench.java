@@ -209,27 +209,27 @@ public class MegamorphicInterfaceListsBench {
     }
 
     @Benchmark
-    public void a_monomorphicDoersList() {
+    public void a_monomorphicDoerList() {
         sum += f(doerList1);
     }
 
     @Benchmark
-    public void b_bimorphicDoersList() {
+    public void b_bimorphicDoerList() {
         sum += f(doerList2);
     }
 
     @Benchmark
-    public void b_bimorphicEqualDoersList() {
+    public void b_bimorphicEqualDoerList() {
         sum += f(doerList2e);
     }
 
     @Benchmark
-    public void c_trimorphicDoersList() {
+    public void c_trimorphicDoerList() {
         sum += f(doerList3);
     }
 
     @Benchmark
-    public void c_trimorphicEqualDoersList() {
+    public void c_trimorphicEqualDoerList() {
         sum += f(doerList3e);
     }
 
@@ -239,47 +239,47 @@ public class MegamorphicInterfaceListsBench {
     }
 
     @Benchmark
-    public void d_quadmorphicEqualDoersList() {
+    public void d_quadmorphicEqualDoerList() {
         sum += f(doerList4e);
     }
 
     @Benchmark
-    public void e_pentamorphicDoersList() {
+    public void e_pentamorphicDoerList() {
         sum += f(doerList5);
     }
 
     @Benchmark
-    public void e_pentamorphicEqualDoersList() {
+    public void e_pentamorphicEqualDoerList() {
         sum += f(doerList5e);
     }
 
     @Benchmark
-    public void f_hexamorphicDoersList() {
+    public void f_hexamorphicDoerList() {
         sum += f(doerList6);
     }
 
     @Benchmark
-    public void f_hexamorphicEqualDoersList() {
+    public void f_hexamorphicEqualDoerList() {
         sum += f(doerList6e);
     }
 
     @Benchmark
-    public void g_septamorphicDoersList() {
+    public void g_septamorphicDoerList() {
         sum += f(doerList7);
     }
 
     @Benchmark
-    public void g_septamorphicEqualDoersList() {
+    public void g_septamorphicEqualDoerList() {
         sum += f(doerList7e);
     }
 
     @Benchmark
-    public void h_octamorphicDoersList() {
+    public void h_octamorphicDoerList() {
         sum += f(doerList8);
     }
 
     @Benchmark
-    public void h_octamorphicEqualDoersList() {
+    public void h_octamorphicEqualDoerList() {
         sum += f(doerList8e);
     }
 }
