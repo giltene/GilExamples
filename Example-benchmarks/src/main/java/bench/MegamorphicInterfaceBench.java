@@ -30,6 +30,9 @@ import java.util.concurrent.TimeUnit;
 
 public class MegamorphicInterfaceBench {
 
+    @Param({"4096"})
+    int arrayLength;
+
     public interface Doer {
         public int doIt(int offset);
     }
@@ -123,29 +126,45 @@ public class MegamorphicInterfaceBench {
         }
     }
 
-    static final int arrayLength = 4096;
+    Doer[] doerArray1;
+    Doer[] doerArray2;
+    Doer[] doerArray3;
+    Doer[] doerArray4;
+    Doer[] doerArray5;
+    Doer[] doerArray6;
+    Doer[] doerArray7;
+    Doer[] doerArray8;
 
-    static final Doer[] doerArray1 = new Doer[arrayLength];
-    static final Doer[] doerArray2 = new Doer[arrayLength];
-    static final Doer[] doerArray3 = new Doer[arrayLength];
-    static final Doer[] doerArray4 = new Doer[arrayLength];
-    static final Doer[] doerArray5 = new Doer[arrayLength];
-    static final Doer[] doerArray6 = new Doer[arrayLength];
-    static final Doer[] doerArray7 = new Doer[arrayLength];
-    static final Doer[] doerArray8 = new Doer[arrayLength];
-
-    static final Doer[] doerArray2e = new Doer[arrayLength];
-    static final Doer[] doerArray3e = new Doer[arrayLength];
-    static final Doer[] doerArray4e = new Doer[arrayLength];
-    static final Doer[] doerArray5e = new Doer[arrayLength];
-    static final Doer[] doerArray6e = new Doer[arrayLength];
-    static final Doer[] doerArray7e = new Doer[arrayLength];
-    static final Doer[] doerArray8e = new Doer[arrayLength];
+    Doer[] doerArray2e;
+    Doer[] doerArray3e;
+    Doer[] doerArray4e;
+    Doer[] doerArray5e;
+    Doer[] doerArray6e;
+    Doer[] doerArray7e;
+    Doer[] doerArray8e;
 
     volatile long sum;
 
     @Setup
     public void setup() throws NoSuchMethodException {
+
+        doerArray1 = new Doer[arrayLength];
+        doerArray2 = new Doer[arrayLength];
+        doerArray3 = new Doer[arrayLength];
+        doerArray4 = new Doer[arrayLength];
+        doerArray5 = new Doer[arrayLength];
+        doerArray6 = new Doer[arrayLength];
+        doerArray7 = new Doer[arrayLength];
+        doerArray8 = new Doer[arrayLength];
+
+        doerArray2e = new Doer[arrayLength];
+        doerArray3e = new Doer[arrayLength];
+        doerArray4e = new Doer[arrayLength];
+        doerArray5e = new Doer[arrayLength];
+        doerArray6e = new Doer[arrayLength];
+        doerArray7e = new Doer[arrayLength];
+        doerArray8e = new Doer[arrayLength];
+
         RandomCollection<Doer> rand1 = new RandomCollection<Doer>().
                 add(10, new DoesA());
         RandomCollection<Doer> rand2 = new RandomCollection<>(rand1).
