@@ -103,6 +103,13 @@ public class StringHashCodesBench {
                     + 31 * val[i+6]
                     + val[i+7];
         }
+        for (; i + 3 < len; i += 4) {
+            h = 31 * 31 * 31 * 31 * h
+                    + 31 * 31 * 31 * val[i]
+                    + 31 * 31 * val[i+1]
+                    + 31 * val[i+2]
+                    + val[i+3];
+        }
         for (; i < len; i++) {
             h = 31 * h + val[i];
         }
@@ -131,6 +138,13 @@ public class StringHashCodesBench {
             }
             h = (31 * 31 * 31 * 31 * 31 * 31 * 31 * 31 * h);
             h += sum;
+        }
+        for (; i + 3 < len; i += 4) {
+            h = 31 * 31 * 31 * 31 * h
+                    + 31 * 31 * 31 * val[i]
+                    + 31 * 31 * val[i+1]
+                    + 31 * val[i+2]
+                    + val[i+3];
         }
         for (; i < len; i++) {
             h = 31 * h + val[i];
@@ -164,6 +178,13 @@ public class StringHashCodesBench {
             }
             h = (31 * 31 * 31 * 31 * 31 * 31 * 31 * 31 * h);
             h += sum;
+        }
+        for (; i + 3 < len; i += 4) {
+            h = 31 * 31 * 31 * 31 * h
+                    + 31 * 31 * 31 * val[i]
+                    + 31 * 31 * val[i+1]
+                    + 31 * val[i+2]
+                    + val[i+3];
         }
         for (; i < len; i++) {
             h = 31 * h + val[i];
