@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 public class StringHashCodesBench {
 
-    @Param({"interned12", "interned24", "interned36", "interned48", "new12", "new24", "new36", "new48"})
+    @Param({"interned12", "interned24", "interned36", "interned48", "interned96", "new12", "new24", "new36", "new48", "new96"})
     String stringName;
 
     char[] val;
@@ -43,10 +43,12 @@ public class StringHashCodesBench {
     private String interned24;
     private String interned36;
     private String interned48;
+    private String interned96;
     private String new12;
     private String new24;
     private String new36;
     private String new48;
+    private String new96;
 
     @Setup
     public void setup() {
@@ -54,6 +56,7 @@ public class StringHashCodesBench {
         interned24 = "abcdefghijklabcdefghijkl";
         interned36 = "abcdefghijklabcdefghijklabcdefghijkl";
         interned48 = "abcdefghijklabcdefghijklabcdefghijklabcdefghijkl";
+        interned96 = "abcdefghijklabcdefghijklabcdefghijklabcdefghijklabcdefghijklabcdefghijklabcdefghijklabcdefghijkl";
 
         new12 = new String(new char[] {
                 72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2
@@ -73,16 +76,28 @@ public class StringHashCodesBench {
                 72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
                 72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2
         });
+        new96 = new String(new char[] {
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2,
+                72, 90, 100, 89, 105, 2, 72, 90, 100, 89, 105, 2
+        });
 
         HashMap<String, String> stringNames = new HashMap<>();
         stringNames.put("interned12", interned12);
         stringNames.put("interned24", interned24);
         stringNames.put("interned36", interned36);
         stringNames.put("interned48", interned48);
+        stringNames.put("interned96", interned96);
         stringNames.put("new12", new12);
         stringNames.put("new24", new24);
         stringNames.put("new36", new36);
         stringNames.put("new48", new48);
+        stringNames.put("new96", new96);
 
         val = stringNames.get(stringName).toCharArray();
     }
