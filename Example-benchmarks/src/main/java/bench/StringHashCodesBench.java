@@ -264,4 +264,86 @@ public class StringHashCodesBench {
         }
         result = h;
     }
+
+    long sumOfEvenValues(int[] values) {
+        long sum = 0;
+        for (int i = 0; i < values.length; i++) {
+            int value = values[i];
+            if (value % 2 == 0) {
+                sum += value;
+            }
+        }
+        return sum;
+    }
+
+    long sumOfEvenValues(Object[] values) {
+        long sum = 0;
+        for (int i = 0; i < values.length; i++) {
+            Object member = values[i];
+            Integer value = (Integer) member; // Can break out of loop with a class cast exception
+            if (value.intValue() % 2 == 0) {  // Can break out of the loop with an NPE
+                sum += value.intValue();
+            }
+        }
+        return sum;
+    }
+
+    long sumOfEvenValuesTransformed(Object[] values) {
+        long sum = 0;
+        int i = 0;
+        int len = values.length;
+        // "Chunked" loop that does 8 things at a time, if all can validly be done. Loop always exits at a chunk
+        // boundary (even f any of the elements in the chunk cannot be validly dealt with), and is safely followed
+        // by a one-at-a-time execution of the remaining elements at the end, or in and early-exit situation:
+        outerLoop:
+        for (; i + 7 < len; i += 8) {
+            // Load a chunk of 8 elements from values[]:
+            final Object[] elements = new Object[8];
+            for (int j = 0; j < 8; j++) {
+                elements[j] = values[i + j];
+            }
+            // Null check 8 eleemnts, if any are null exit chunked loop and continue one-at-a-time
+            for (int j = 0; j < 8; j++) {
+                if (elements[i] == null)
+                    break outerLoop;
+            }
+            // Gather the kids of 8 elements
+            final Class[] kids = new Class[8];
+            for (int j = 0; j < 8; j++) {
+                kids[j] = elements[j].getClass();
+            }
+            // Verify the kids of 8 elements. If any is not Integer, exit chunked loop and continue one-at-a-time
+            for (int j = 0; j < 8; j++) {
+                if (kids[j] != Integer.class)
+                    break outerLoop;
+            }
+
+            // Ignore: this is redundant with the kids check already done above. Here just to contain the actual java casts.
+            final Integer[] integerVals = new Integer[8];
+            for (int j = 0; j < 8; j++) {
+                integerVals[j] = (Integer) elements[j];
+            }
+
+            // Gather 8 int values from 8 separate Integer objects:
+            final int[] intVals = new int[8];
+            for (int j = 0; j < 8; j++) {
+                intVals[j] = integerVals[j].intValue();
+            }
+            // Perform predicated adds (for even valued intVals[] member):
+            for (int j = 0; j < 8; j++) {
+                int val = intVals[j];
+                if (val % 2 == 0) {
+                    sum += val;
+                }
+            }
+        }
+        for (; i < len; i++) {
+            Object member = values[i];
+            Integer value = (Integer) member; // Can break out of loop with a class cast exception
+            if (value.intValue() % 2 == 0) {  // Can break out of the loop with an NPE
+                sum += value.intValue();
+            }
+        }
+        return sum;
+    }
 }
