@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ThreadDeadLocker {
     static final boolean verbose = false;
-    static final Duration timeToDoStuff = Duration.ZERO;
+    static final Duration doSomethingDuration = Duration.ZERO;
     static final Duration waitLoopSleepDuration = Duration.ofMillis(1);
     static final Duration runnerLoopSleepDuration = Duration.ofMillis(1);
 
@@ -43,16 +43,14 @@ public class ThreadDeadLocker {
 
     public static class ChainedThing {
         private static AtomicLong overallCount = new AtomicLong(0);
-        private String name;
-        private ChainedThing nextThing;
-        private Duration duration;
-        private AtomicLong chainCount;
-
+        private final String name;
+        private final Duration duration;
+        private final AtomicLong chainCount;
+        private ChainedThing nextThing = null;
         private volatile boolean go = false;
 
-        ChainedThing(String name, ChainedThing nextThing, AtomicLong chainCount, Duration duration) {
+        ChainedThing(String name, AtomicLong chainCount, Duration duration) {
             this.name = name;
-            setNextThing(nextThing);
             this.duration = duration;
             this.chainCount = chainCount;
         }
@@ -84,13 +82,11 @@ public class ThreadDeadLocker {
         public synchronized void doSomething(Duration duration) {
             go = false;
             if (!duration.isZero()) {
-                try {
-                    Thread.sleep(duration);
-                } catch (InterruptedException e) {
-                    // skip
-                }
+                try { Thread.sleep(duration); } catch (InterruptedException e) {}
             }
-            nextThing.go();
+            if (nextThing != null) {
+                nextThing.go();
+            }
             overallCount.incrementAndGet();
             chainCount.incrementAndGet();
         }
@@ -99,10 +95,7 @@ public class ThreadDeadLocker {
             while (!go) {
                 // wait for go to be set by another thing.
                 if (!waitLoopSleepDuration.isZero()) {
-                    try {
-                        Thread.sleep(waitLoopSleepDuration);
-                    } catch (InterruptedException e) {
-                    }
+                    try { Thread.sleep(waitLoopSleepDuration); } catch (InterruptedException e) {}
                 }
             }
         }
@@ -116,13 +109,11 @@ public class ThreadDeadLocker {
 
         @Override
         public void run() {
-            synchronized (this) {
-                while (true) {
-                    theThing.waitToDoSomething();
-                    theThing.doSomething();
-                    if (!runnerLoopSleepDuration.isZero()) {
-                        try {Thread.sleep(runnerLoopSleepDuration);} catch (InterruptedException e) {}
-                    }
+            while (true) {
+                theThing.waitToDoSomething();
+                theThing.doSomething();
+                if (!runnerLoopSleepDuration.isZero()) {
+                    try { Thread.sleep(runnerLoopSleepDuration); } catch (InterruptedException e) {}
                 }
             }
         }
@@ -146,8 +137,9 @@ public class ThreadDeadLocker {
             AtomicLong chainCount = new AtomicLong();
             // Populate the chain:
             for (int j = 0; j < chainLength; j++) {
-                chain.add(new ChainedThing("Thing " + j + " in ThingChain " + i, null, chainCount,
-                        (j == 0) ? timeToDoStuff : Duration.ZERO));
+                chain.add(new ChainedThing("Thing " + j + " in ThingChain " + i,
+                        chainCount,
+                        (j == 0) ? doSomethingDuration : Duration.ZERO));
             }
             // Connect the chain in a loop:
             for (int j = 0; j < chainLength; j++) {
@@ -164,15 +156,21 @@ public class ThreadDeadLocker {
         List<Thread> threads = new ArrayList<>();
 
         for (int i = 0; i < chainLength; i++) {
-            // For each position i accross all chains, create a runnable and start a thread for the thing at
-            // the i'th position of that chain:
+            // position starts from end of chain and moves backwards to the beginning:
+            int position = chainLength - 1 - i;
+            // For each position accross all chains, create a runnable and start a thread for the thing at
+            // the position of that chain:
             // (we do this in this semi-strange order so that each chain would have threads started before
-            // other chains have all their threads started. This way, in a limited-ability-to-host-threads
-            // deadlock-inducing situation  (i.e. Virtual Threads with fewer carrier threads than eiter the
-            // chain length or the number of chains), no chain will have all of its thread sitting on carrier
-            // threads, and no chain will make continued forward progress once).
+            // other chains have all their threads started, and such that the threads started first in each chain
+            // would be the last ones to get to proceed when activity starts.
+            // This way, in a limited-ability-to-host-threads deadlock-inducing situation  (i.e. Virtual Threads
+            // with fewer carrier threads than (2 * chain length * number of chains), no chain will have all of its
+            // threads sitting on carrier threads, and no chain will make continued forward progress, even as no thread
+            // holds onto any monitor indefinitely if it allowed to proceed with work...
+            // (deadlocks can happen at even fewer "thing" counts, but at (2 * chain length * number of chains) they
+            // are fairly certain to reliably happen with this runnable start order...)
             for (List<ChainedThing> chain : thingChains) {
-                ChainedThing thing = chain.get(i);
+                ChainedThing thing = chain.get(position);
                 threads.add(makeThread(thing.getName(), new RunnableThing(thing), useVirtualThreads));
             }
         }
@@ -206,6 +204,7 @@ public class ThreadDeadLocker {
                 }
                 prevOverallCount = overallCount;
                 prevMillis = timeMillis;
+
                 System.out.println("progress count = " + overallCount + ", rate of progress = " + rate + "/sec");
                 if (!noProgressChains.isEmpty()) {
                     System.out.print("\tThe following chains showed no progress:");
