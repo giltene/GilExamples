@@ -1,7 +1,6 @@
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -13,6 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * creating plenty of potential a carrier-resource-starvation situations to lead to virtual thread execution
  * deadlocks, even in situation where perfect lock priority discipline is maintained.
  *
+ * Usage: java --enable-preview ThreadDeadLocker [p | v] <numberOfChains> <chainLength>
+ *
  * To demonstrate deadlocks: use virtual thread ("v") and a chain length or a number of chains (of length 2 or more)
  * larger than the number of carrier threads the system you run on has. To demonstrate that a "normal" thread
  * scheduling system (which can interleave the execution of different threads on cpus, regardless of what locks those
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * chain  counts, but with platform threads ("p"). A deadlock will be evident by continued reports of a zero rate
  * of progress...
  *
- * Bottom line: Lock priority disciplien is a commonly used technique for ensuring that deadlocks are impossible
+ * Bottom line: Lock priority discipline is a commonly used technique for ensuring that deadlocks are impossible
  * in multi-threaded systems (by systemically preventing the possibility of lock-blocking loops), but this technique
  * can easily fail to protect against deadlocks with Java's the current (as of Java 20) Virtual Threads
  * implementations, leaving most systems with no effective means of preventing deadlocks, or of detecting their
@@ -122,7 +123,7 @@ public class ThreadDeadLocker {
     public static void main(String[] args) {
 
         if ((args.length != 3) || !(args[0].equals("p") || args[0].equals("v"))) {
-            System.out.println("Usage: java ThreadDeadLocker [p | v] <numberOfChains> <chainLength>");
+            System.out.println("Usage: java --enable-preview ThreadDeadLocker [p | v] <numberOfChains> <chainLength>");
             System.exit(1);
         }
         boolean useVirtualThreads = args[0].equals("v");
