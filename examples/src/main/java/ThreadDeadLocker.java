@@ -14,12 +14,13 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * Usage: java --enable-preview ThreadDeadLocker [p | v] <numberOfChains> <chainLength>
  *
- * To demonstrate deadlocks: use virtual thread ("v") and a chain length or a number of chains (of length 2 or more)
- * larger than the number of carrier threads the system you run on has. To demonstrate that a "normal" thread
- * scheduling system (which can interleave the execution of different threads on cpus, regardless of what locks those
- * threads may or may not hold) is NOT susceptible to deadlocking under the same scenarios, run the same chain length
- * chain  counts, but with platform threads ("p"). A deadlock will be evident by continued reports of a zero rate
- * of progress...
+ * To demonstrate deadlocks: use virtual thread ("v") and supply numberOfChains and chainLength parameters such
+ * that (numberOfChains * chainLength) will be larger than the number of carrier threads the system you run on has.
+ * To demonstrate that a "normal" thread scheduling system (which can interleave the execution of different threads
+ * on cpus, regardless of what locks those threads may or may not hold) is NOT susceptible to deadlocking under the
+ * same scenarios, run with the same chain count and chain length, but with platform threads ("p"). A deadlock will
+ * be evident either by continued reports of a zero rate of progress, or through reports of the specific chains that
+ * are making no progress...
  *
  * Bottom line: Lock priority discipline is a commonly used technique for ensuring that deadlocks are impossible
  * in multi-threaded systems (by systemically preventing the possibility of lock-blocking loops), but this technique
@@ -41,17 +42,19 @@ public class ThreadDeadLocker {
     }
 
     public static class ChainedThing {
-        private static AtomicLong valueCount = new AtomicLong(0);
+        private static AtomicLong overallCount = new AtomicLong(0);
         private String name;
         private ChainedThing nextThing;
         private Duration duration;
+        private AtomicLong chainCount;
 
         private volatile boolean go = false;
 
-        ChainedThing(String name, ChainedThing nextThing, Duration duration) {
+        ChainedThing(String name, ChainedThing nextThing, AtomicLong chainCount, Duration duration) {
             this.name = name;
             setNextThing(nextThing);
             this.duration = duration;
+            this.chainCount = chainCount;
         }
 
         void setNextThing(ChainedThing nextThing) {
@@ -62,8 +65,12 @@ public class ThreadDeadLocker {
             return name;
         }
 
-        static long getCount() {
-            return valueCount.get();
+        static long getOverallCount() {
+            return overallCount.get();
+        }
+
+        long getChainCount() {
+            return chainCount.get();
         }
 
         public void go() {
@@ -84,7 +91,8 @@ public class ThreadDeadLocker {
                 }
             }
             nextThing.go();
-            valueCount.incrementAndGet();
+            overallCount.incrementAndGet();
+            chainCount.incrementAndGet();
         }
 
         public synchronized void waitToDoSomething() {
@@ -135,9 +143,10 @@ public class ThreadDeadLocker {
 
         for (int i = 0; i < numberOfChains; i++) {
             List<ChainedThing> chain = new ArrayList<>();
+            AtomicLong chainCount = new AtomicLong();
             // Populate the chain:
             for (int j = 0; j < chainLength; j++) {
-                chain.add(new ChainedThing("Thing " + j + " in ThingChain " + i, null,
+                chain.add(new ChainedThing("Thing " + j + " in ThingChain " + i, null, chainCount,
                         (j == 0) ? timeToDoStuff : Duration.ZERO));
             }
             // Connect the chain in a loop:
@@ -176,16 +185,35 @@ public class ThreadDeadLocker {
 
         // Report on progress:
         try {
-            long prevVal = 0;
+            long prevOverallCount = 0;
+            long[] prevChainCounts = new long[numberOfChains];
+            List<Integer> noProgressChains = new ArrayList<>();
             long prevMillis = System.currentTimeMillis();
+
             while (true) {
                 Thread.sleep(Duration.ofSeconds(1));
-                long val = ChainedThing.getCount();
+                long overallCount = ChainedThing.getOverallCount();
                 long timeMillis = System.currentTimeMillis();
-                double rate = (1000.0 * (double)(val - prevVal)) / (timeMillis - prevMillis);
-                System.out.println("progress count = " + ChainedThing.getCount() + ", rate of progress = " + rate + "/sec");
-                prevVal = val;
+                double rate = (1000.0 * (double)(overallCount - prevOverallCount)) / (timeMillis - prevMillis);
+                noProgressChains.clear();
+                for (int i = 0; i < numberOfChains; i++) {
+                    List<ChainedThing> chain = thingChains.get(i);
+                    long chainCount = chain.get(0).getChainCount();
+                    if (chainCount - prevChainCounts[i] == 0) {
+                        noProgressChains.add(i);
+                    }
+                    prevChainCounts[i] = chainCount;
+                }
+                prevOverallCount = overallCount;
                 prevMillis = timeMillis;
+                System.out.println("progress count = " + overallCount + ", rate of progress = " + rate + "/sec");
+                if (!noProgressChains.isEmpty()) {
+                    System.out.print("\tThe following chains showed no progress:");
+                    for (Integer chainNumber : noProgressChains) {
+                        System.out.print(" " + chainNumber);
+                    }
+                    System.out.println();
+                }
             }
         } catch (InterruptedException e) {
             // bugger out
