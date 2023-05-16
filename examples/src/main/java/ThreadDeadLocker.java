@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * A demonstrator for a basic and easily-hittable deadlock situation with the current (Java 20) implementation
  * of Virtual Threads. At the core of the mechanism that creates the inherent deadlock potential is the fact that
- * virtial threads that hold a monitor are "pinned" to their platform carrier threads, and will not relinquish
+ * virtual threads that hold a monitor are "pinned" to their platform carrier threads, and will not relinquish
  * them and allow other virtual threads to use them until the monitor is released. This design limitation
  * inherently limits the total number of monitors that can be held at the same time across all virtual threads,
  * creating plenty of potential a carrier-resource-starvation situations to lead to virtual thread execution
@@ -15,12 +15,21 @@ import java.util.concurrent.atomic.AtomicLong;
  * Usage: java --enable-preview ThreadDeadLocker [p | v] <numberOfChains> <chainLength>
  *
  * To demonstrate deadlocks: use virtual thread ("v") and supply numberOfChains and chainLength parameters such
- * that (numberOfChains * chainLength) will be larger than the number of carrier threads the system you run on has.
+ * that (2 * numberOfChains * chainLength) will be larger than the number of carrier threads the system you run on has.
  * To demonstrate that a "normal" thread scheduling system (which can interleave the execution of different threads
  * on cpus, regardless of what locks those threads may or may not hold) is NOT susceptible to deadlocking under the
  * same scenarios, run with the same chain count and chain length, but with platform threads ("p"). A deadlock will
  * be evident either by continued reports of a zero rate of progress, or through reports of the specific chains that
  * are making no progress...
+ *
+ * Note that the deadlocks being demonstrated here can naturally and inherently happen when timing happens to be
+ * right, even with monitors that protect normally-very-quick-to-execute critical code sections. This demonstrator
+ * simply induces the needed timing quickly and semi-reliably. But even without this intentionally-induced timing,
+ * the exact same deadlock conditions can (and will) eventually happen naturally with enough time under load, in
+ * the presence of enough monitors being exercised. Natural causes for occasionally elongated execution time while
+ * holding a monitor protecting a normally-very-quick-to-execute critical section of code (e.g. throttling in
+ * container environments, preemptive time slicing by the operating system when other work is sharing the same
+ * vCPU, etc.) will eventually lead to these deadlock situation in real world conditions.
  *
  * Bottom line: Lock priority discipline is a commonly used technique for ensuring that deadlocks are impossible
  * in multi-threaded systems (by systemically preventing the possibility of lock-blocking loops), but this technique
