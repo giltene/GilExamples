@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * Bottom line: Lock priority discipline is a commonly used technique for ensuring that deadlocks are impossible
  * in multi-threaded systems (by systemically preventing the possibility of lock-blocking loops), but this technique
- * can easily fail to protect against deadlocks with Java's current (as of Java 20) Virtual Threads
+ * can easily fail to protect against deadlocks with Java's current (as of Java 21) Virtual Threads
  * implementations, leaving most systems with no effective means of preventing deadlocks, or of detecting their
  * potential existence...
  */
