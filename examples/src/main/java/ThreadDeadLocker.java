@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A demonstrator for a basic and easily-hittable deadlock situation with the current (Java 20) implementation
+ * A demonstrator for a basic and easily-hittable deadlock situation with the current (Java 21) implementation
  * of Virtual Threads. At the core of the mechanism that creates the inherent deadlock potential is the fact that
  * virtual threads that hold a monitor are "pinned" to their platform carrier threads, and will not relinquish
  * them and allow other virtual threads to use them until the monitor is released. This design limitation
@@ -12,15 +12,25 @@ import java.util.concurrent.atomic.AtomicLong;
  * creating plenty of potential a carrier-resource-starvation situations to lead to virtual thread execution
  * deadlocks, even in situation where perfect lock priority discipline is maintained.
  *
- * Usage: java --enable-preview ThreadDeadLocker [p | v] <numberOfChains> <chainLength>
+ * Usage: java ThreadDeadLocker [p | v] <numberOfChains> <chainLength>
  *
- * To demonstrate deadlocks: use virtual thread ("v") and supply numberOfChains and chainLength parameters such
+ * To demonstrate deadlocks: use virtual thread ("v"), a chainLength of 2 or more, and a chainLength parameters such
  * that (2 * numberOfChains * chainLength) will be larger than the number of carrier threads the system you run on has.
  * To demonstrate that a "normal" thread scheduling system (which can interleave the execution of different threads
  * on cpus, regardless of what locks those threads may or may not hold) is NOT susceptible to deadlocking under the
  * same scenarios, run with the same chain count and chain length, but with platform threads ("p"). A deadlock will
  * be evident either by continued reports of a zero rate of progress, or through reports of the specific chains that
  * are making no progress...
+ *
+ * E.g. Currently, with OpenJDK 21.0.1, on a 10 core Laptop (Apple M2 Max), the following will demonstrate deadlocks:
+ *     java ThreadDeadLocker v 10 2
+ * While the following will not:
+ *     java ThreadDeadLocker p 10 2
+ *     java ThreadDeadLocker v 1 2
+ * And the following will show some chains deadlocked while other continue to do work:
+ *     java ThreadDeadLocker v 9 2
+ *     java ThreadDeadLocker v 8 2
+ *     ...
  *
  * Note that the deadlocks being demonstrated here can naturally and inherently happen when timing happens to be
  * right, even with monitors that protect normally-very-quick-to-execute critical code sections. This demonstrator
@@ -33,15 +43,18 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * Bottom line: Lock priority discipline is a commonly used technique for ensuring that deadlocks are impossible
  * in multi-threaded systems (by systemically preventing the possibility of lock-blocking loops), but this technique
- * can easily fail to protect against deadlocks with Java's the current (as of Java 20) Virtual Threads
+ * can easily fail to protect against deadlocks with Java's current (as of Java 20) Virtual Threads
  * implementations, leaving most systems with no effective means of preventing deadlocks, or of detecting their
  * potential existence...
  */
 public class ThreadDeadLocker {
-    static final boolean verbose = false;
-    static final Duration doSomethingDuration = Duration.ZERO;
-    static final Duration waitLoopSleepDuration = Duration.ofMillis(1);
-    static final Duration runnerLoopSleepDuration = Duration.ofMillis(1);
+    static final boolean verbose = Boolean.getBoolean("ThreadDeadLocker.verbose");;
+    static final Duration doSomethingDuration =
+            Duration.ofMillis(Integer.getInteger("ThreadDeadLocker.doSomethingDurationMsec", 0));
+    static final Duration waitLoopSleepDuration =
+                Duration.ofMillis(Integer.getInteger("ThreadDeadLocker.waitLoopSleepDurationMsec", 1));
+    static final Duration runnerLoopSleepDuration =
+            Duration.ofMillis(Integer.getInteger("ThreadDeadLocker.runnerLoopSleepDurationMsec", 1));
 
     private static Thread makeThread(String threadName, Runnable runnable, boolean useVirtualThread) {
         if (useVirtualThread) {
