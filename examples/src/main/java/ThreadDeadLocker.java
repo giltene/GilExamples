@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Does not seem to demonstrate deadlocking (on this specific hardware and Java 21 version).
  *
  * But running with the same number of chains and chain length without sleeping in any loops (and thus allowing natural
- * timing variations due to system scheduling the opportunity to get the starts aligned just right):
+ * timing variations due to system scheduling the opportunity to get the "stars aligned" just right):
  *     java -DThreadDeadLocker.waitLoopSleepDurationMsec=0 -DThreadDeadLocker.runnerLoopSleepDurationMsec=0 ThreadDeadLocker v 9 2
  * Will report deadlocks on some chains while others do not deadlock (on this specific hardware and Java 21 version),
  * reporting e.g:
