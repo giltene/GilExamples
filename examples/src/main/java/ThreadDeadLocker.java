@@ -9,28 +9,47 @@ import java.util.concurrent.atomic.AtomicLong;
  * virtual threads that hold a monitor are "pinned" to their platform carrier threads, and will not relinquish
  * them and allow other virtual threads to use them until the monitor is released. This design limitation
  * inherently limits the total number of monitors that can be held at the same time across all virtual threads,
- * creating plenty of potential a carrier-resource-starvation situations to lead to virtual thread execution
+ * creating plenty of potential for carrier-resource-starvation situations to lead to virtual thread execution
  * deadlocks, even in situation where perfect lock priority discipline is maintained.
  *
  * Usage: java ThreadDeadLocker [p | v] <numberOfChains> <chainLength>
  *
- * To demonstrate deadlocks: use virtual thread ("v"), a chainLength of 2 or more, and a chainLength parameters such
- * that (2 * numberOfChains * chainLength) will be larger than the number of carrier threads the system you run on has.
+ * To demonstrate deadlocks: use virtual thread ("v"), a chainLength of 2 or more, and select chainLength and
+ * numberOfChains parameters such that (2 * numberOfChains * chainLength) will be larger than the number of carrier
+ * threads the system you run on has.
+ *
  * To demonstrate that a "normal" thread scheduling system (which can interleave the execution of different threads
  * on cpus, regardless of what locks those threads may or may not hold) is NOT susceptible to deadlocking under the
  * same scenarios, run with the same chain count and chain length, but with platform threads ("p"). A deadlock will
  * be evident either by continued reports of a zero rate of progress, or through reports of the specific chains that
  * are making no progress...
  *
- * E.g. Currently, with OpenJDK 21.0.1, on a 10 core Laptop (Apple M2 Max), the following will demonstrate deadlocks:
- *     java ThreadDeadLocker v 10 2
- * While the following will not:
- *     java ThreadDeadLocker p 10 2
+ * E.g. with OpenJDK 21.0.3, on a 16 core Laptop (Apple M3 Max), the following reliably demonstrates deadlocks:
+ *     java ThreadDeadLocker v 16 2
+ *     java ThreadDeadLocker v 2 9
+ *     java ThreadDeadLocker v 1 17
+ * While the following will not indicate deadlock:
+ *     java ThreadDeadLocker p 16 2
+ *     java ThreadDeadLocker p 2 9
+ *     java ThreadDeadLocker p 1 17
  *     java ThreadDeadLocker v 1 2
- * And the following will show some chains deadlocked while other continue to do work:
+ *
+ * In addition, timing sensitivity at counts below the critical level can be demonstrated, highlighting the fact
+ * that not seeing a deadlock at some thread count combination does not mean it cannot happen given enough time
+ * to induce "luckiness":
+ * E.g. running:
  *     java ThreadDeadLocker v 9 2
- *     java ThreadDeadLocker v 8 2
- *     ...
+ * Does not seem to demonstrate deadlocking (on this specific hardware and Java 21 version).
+ *
+ * But running with the same number of chains and chain length without sleeping in any loops (and thus allowing natural
+ * timing variations due to system scheduling the opportunity to get the starts aligned just right):
+ *     java -DThreadDeadLocker.waitLoopSleepDurationMsec=0 -DThreadDeadLocker.runnerLoopSleepDurationMsec=0 ThreadDeadLocker v 9 2
+ * Will report deadlocks on some chains while others do not deadlock (on this specific hardware and Java 21 version),
+ * reporting e.g:
+ *        Running with numberOfChains = 9, chainLength = 2
+ *        progress count = 11970384, rate of progress = 1.1887173783515392E7/sec
+ *                The following chains showed no progress: 7 8
+ *        (repeats...)
  *
  * Note that the deadlocks being demonstrated here can naturally and inherently happen when timing happens to be
  * right, even with monitors that protect normally-very-quick-to-execute critical code sections. This demonstrator
@@ -39,7 +58,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * the presence of enough monitors being exercised. Natural causes for occasionally elongated execution time while
  * holding a monitor protecting a normally-very-quick-to-execute critical section of code (e.g. throttling in
  * container environments, preemptive time slicing by the operating system when other work is sharing the same
- * vCPU, etc.) will eventually lead to these deadlock situation in real world conditions.
+ * vCPU, etc.) will eventually lead to these deadlock situations in real world conditions.
  *
  * Bottom line: Lock priority discipline is a commonly used technique for ensuring that deadlocks are impossible
  * in multi-threaded systems (by systemically preventing the possibility of lock-blocking loops), but this technique
@@ -185,12 +204,14 @@ public class ThreadDeadLocker {
             // (we do this in this semi-strange order so that each chain would have threads started before
             // other chains have all their threads started, and such that the threads started first in each chain
             // would be the last ones to get to proceed when activity starts.
-            // This way, in a limited-ability-to-host-threads deadlock-inducing situation  (i.e. Virtual Threads
-            // with fewer carrier threads than (2 * chain length * number of chains), no chain will have all of its
-            // threads sitting on carrier threads, and no chain will make continued forward progress, even as no thread
-            // holds onto any monitor indefinitely if it allowed to proceed with work...
-            // (deadlocks can happen at even fewer "thing" counts, but at (2 * chain length * number of chains) they
-            // are fairly certain to reliably happen with this runnable start order...)
+            // This way, in a limited-ability-to-host-lock-holding-threads deadlock-inducing situation (e.g.
+            // Virtual Threads with fewer carrier threads than (2 * chain length * number of chains), no chain
+            // will ever have all of its threads sitting on carrier threads, and no chain will make continued
+            // forward progress, even as no thread holds onto any monitor indefinitely if it allowed to proceed
+            // with work...
+            // (deadlocks can happen at even fewer "thing" counts, but when (2 * chain length * number of chains) is
+            //  larger than the system's total ability to host lock-holding threads they are fairly certain to
+            //  reliably happen to all chains with this runnable start order...)
             for (List<ChainedThing> chain : thingChains) {
                 ChainedThing thing = chain.get(position);
                 threads.add(makeThread(thing.getName(), new RunnableThing(thing), useVirtualThreads));
