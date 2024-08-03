@@ -15,6 +15,6 @@ java -javaagent:./build/libs/FinalizerIntroducingAgent-1.0-SNAPSHOT.jar -Dorg.gi
 
 ### Expected usage with actual applications:
 ```
-  java ... -javaagent=FinalizerIntroducingAgent.jar ...
+  java -javaagent:FinalizerIntroducingAgent-1.0-SNAPSHOT.jar ...
 ```
 
