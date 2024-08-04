@@ -6,12 +6,12 @@ A java agent that introduces a class with a finalizer and makes sure it gets exc
 ./gradlew build
 ```
 
-### To verify build:
+### To verify build snd agent functionality:
 Run with the verbose flag set, e.g.:
 ```
 java -javaagent:./build/libs/FinalizerIntroducingAgent-1.0-SNAPSHOT.jar -Dorg.giltene.finalizerintroducingagent.verbose=true -version
 ```
-... and check output for "Validation detected" messages.
+... and check output for "Finalization detected" messages.
 
 ### Expected usage with actual applications:
 ```
