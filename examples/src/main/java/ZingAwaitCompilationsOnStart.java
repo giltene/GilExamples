@@ -52,14 +52,23 @@ public final class ZingAwaitCompilationsOnStart {
 
     private ZingAwaitCompilationsOnStart() {}
 
+    /**
+     * @param targetDepth                 queue size (inclusive) that satisfies the condition
+     * @param deadlineSinceStartMs        absolute deadline counted from JVM start (ms)
+     * @param returnImmediatelyIfNotZing  true → return {@code true} right away on non-Zing JVMs
+     */
     public static boolean compileQueueDepthOrDeadlineReached(int targetDepth,
-                                                             long deadlineSinceStartMs) {
+                                                             long deadlineSinceStartMs,
+                                                             boolean returnImmediatelyIfNotZing) {
 
         if (System.currentTimeMillis() - JVM_START >= deadlineSinceStartMs) {
             return true;
         }
 
-        if (!(IS_ZING && COMPILATION_MXBEAN_AVAILABLE)) {
+        if (!IS_ZING) {
+            return returnImmediatelyIfNotZing;
+        }
+        if (!COMPILATION_MXBEAN_AVAILABLE) {
             return false;
         }
 
@@ -80,7 +89,7 @@ public final class ZingAwaitCompilationsOnStart {
         long startSinceStart = System.currentTimeMillis() - JVM_START;
         System.out.println("Await loop started at JVM-uptime(ms): " + startSinceStart);
 
-        while (!compileQueueDepthOrDeadlineReached(targetDepth, deadlineMs)) {
+        while (!compileQueueDepthOrDeadlineReached(targetDepth, deadlineMs, true)) {
             try { Thread.sleep(1); }
             catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
