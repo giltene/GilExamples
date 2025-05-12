@@ -53,20 +53,20 @@ public final class ZingAwaitCompilationsOnStart {
     private ZingAwaitCompilationsOnStart() {}
 
     /**
-     * @param targetDepth                 queue size (inclusive) that satisfies the condition
-     * @param deadlineSinceStartMs        absolute deadline counted from JVM start (ms)
-     * @param returnImmediatelyIfNotZing  true → return {@code true} right away on non-Zing JVMs
+     * @param targetDepth               queue size (inclusive) that satisfies the condition
+     * @param deadlineSinceStartMs      absolute deadline counted from JVM start (ms)
+     * @param awaitDeadlineOnlyOnZing   true → on non-Zing JVMs return <code>true</code> immediately
      */
     public static boolean compileQueueDepthOrDeadlineReached(int targetDepth,
                                                              long deadlineSinceStartMs,
-                                                             boolean returnImmediatelyIfNotZing) {
+                                                             boolean awaitDeadlineOnlyOnZing) {
 
         if (System.currentTimeMillis() - JVM_START >= deadlineSinceStartMs) {
             return true;
         }
 
         if (!IS_ZING) {
-            return returnImmediatelyIfNotZing;
+            return awaitDeadlineOnlyOnZing;   // if true, succeed immediately on non-Zing
         }
         if (!COMPILATION_MXBEAN_AVAILABLE) {
             return false;
